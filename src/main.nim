@@ -83,24 +83,35 @@ when defined(js):
     let el = document.getElementById("game")
     if not el.isNil:
       el.addEventListener("click", proc(ev: Event) =
-        let target = ev.target
-        if target.isNil: return
-        let dataIndex = target.getAttribute("data-index")
-        let dataPlay = target.getAttribute("data-play")
-        let dataNext = target.getAttribute("data-next")
-        let dataNew = target.getAttribute("data-new")
-        if dataPlay != "": onPlayHand()
-        elif dataNext != "": startNewRound()
-        elif dataNew != "":
-          clearState()
-          gRunState = initRunState()
-          startNewRound()
-        elif dataIndex != "":
-          let idx = parseInt($dataIndex)
-          let pos = gSelected.find(idx)
-          if pos >= 0: gSelected.del(pos)
-          elif gSelected.len < 5: gSelected.add(idx)
-          render()
+        # Click might be on SVG/text inside the card div — find ancestor with data-* attributes.
+        var node = cast[Element](ev.target)
+        if node.isNil and not ev.target.isNil:
+          let n = cast[Node](ev.target)
+          if not n.isNil and not n.parentElement.isNil: node = n.parentElement
+        while not node.isNil:
+          let dataIndex = node.getAttribute("data-index")
+          let dataPlay = node.getAttribute("data-play")
+          let dataNext = node.getAttribute("data-next")
+          let dataNew = node.getAttribute("data-new")
+          if dataPlay != "":
+            onPlayHand()
+            return
+          if dataNext != "":
+            startNewRound()
+            return
+          if dataNew != "":
+            clearState()
+            gRunState = initRunState()
+            startNewRound()
+            return
+          if dataIndex != "":
+            let idx = parseInt($dataIndex)
+            let pos = gSelected.find(idx)
+            if pos >= 0: gSelected.del(pos)
+            elif gSelected.len < 5: gSelected.add(idx)
+            render()
+            return
+          node = node.parentElement
       )
   run()
 else:
