@@ -8,6 +8,7 @@ import scoring
 
 type
   RoundState* = object
+    ## State for one round: hand cards, deck, target, and Jokers for scoring.
     handsLeft*: int
     discardsLeft*: int
     hand*: seq[Card]
@@ -16,6 +17,7 @@ type
     jokers*: seq[Joker]
 
   PlayResult* = enum
+    ## Outcome of playing a hand: win round, use a hand and continue, or game over.
     RoundWon, HandConsumed, GameOver
 
 proc startRound*(handsPerRound: int; discardsPerRound: int; targetChips: int;

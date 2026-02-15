@@ -1,8 +1,10 @@
 # Nim
 nimcache/
-*.js
 *.exe
+# Root build output (do not commit; use docs/ for playable deployment)
 bhanda.js
+# Allow the playable bundle in docs/ for GitHub Pages
+!docs/bhanda.js
 
 # IDE / OS
 .idea/
@@ -14,3 +16,4 @@ Thumbs.db
 
 # Build artifacts
 htmldocs/
+tests/run_tests

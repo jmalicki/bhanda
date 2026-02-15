@@ -14,6 +14,10 @@ binDir        = "."
 task buildjs, "Build JavaScript bundle for browser":
   exec "nim js -d:release -o:bhanda.js src/main.nim"
 
+task deploy, "Build and copy bhanda.js to docs/ for GitHub Pages (playable in browser)":
+  exec "nim js -d:release -o:bhanda.js src/main.nim"
+  exec "cp bhanda.js docs/bhanda.js"
+
 task test, "Run all tests (C backend)":
   exec "nim c -r tests/run_tests.nim"
 

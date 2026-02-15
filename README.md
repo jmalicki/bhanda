@@ -2,6 +2,10 @@
 
 A poker roguelike deck-builder in Nim (in the style of Balatro). Play poker hands to beat blind targets, buy Jokers in the shop, and win by defeating the ante 8 boss. The game compiles to JavaScript and runs in the browser.
 
+## Play
+
+**[Play Bhanda](docs/index.html)** — the in-repo game. CI builds and publishes it to **GitHub Pages** on every push to `main`. In the repo **Settings → Pages → Source**, choose **GitHub Actions**; the site will be at `https://<user>.github.io/bhanda/`.
+
 ## Requirements
 
 - [Nim](https://nim-lang.org/) (2.0 or later). Install via:

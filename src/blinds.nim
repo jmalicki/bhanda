@@ -2,9 +2,11 @@
 
 type
   BlindKind* = enum
+    ## Blind type within an ante: small (0), big (1), boss (2).
     SmallBlind, BigBlind, BossBlind
 
   RunProgress* = object
+    ## Progress through the run: current ante (1–8+), round within ante (0–2).
     ante*: int
     roundInAnte*: int
 

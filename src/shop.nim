@@ -4,10 +4,12 @@ import scoring
 
 type
   ShopItem* = object
+    ## One Joker for sale and its price.
     joker*: Joker
     price*: int
 
   ShopState* = object
+    ## Current shop offerings; purchase removes the item and deducts money.
     items*: seq[ShopItem]
 
 proc cashForBlind*(blindIndex: int): int =

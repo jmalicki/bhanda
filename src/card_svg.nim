@@ -3,10 +3,11 @@
 import cards
 
 const
-  CardW* = 80
-  CardH* = 112
+  CardW* = 80   ## Card SVG width in pixels.
+  CardH* = 112  ## Card SVG height in pixels.
 
 proc suitSymbol(s: Suit): string =
+  ## Unicode symbol for the suit (♠ ♥ ♦ ♣).
   case s
   of Spades: "♠"
   of Hearts: "♥"
@@ -14,17 +15,21 @@ proc suitSymbol(s: Suit): string =
   of Clubs: "♣"
 
 proc rankStr(r: Rank): string =
+  ## Short string for rank (2–10, J, Q, K, A).
   const a: array[2..14, string] = ["2", "3", "4", "5", "6", "7", "8", "9", "10", "J", "Q", "K", "A"]
   a[int(r)]
 
 proc pipSvg(suit: Suit; x, y: float): string =
+  ## One suit symbol as SVG text at (x, y).
   let s = suitSymbol(suit)
   "<text x=\"" & $x & "\" y=\"" & $y & "\" text-anchor=\"middle\" font-size=\"14\">" & s & "</text>"
 
 proc cardFrameSvg(): string =
+  ## Rounded white rectangle with border (card outline).
   "<rect x=\"1\" y=\"1\" width=\"" & $CardW & "\" height=\"" & $CardH & "\" rx=\"4\" ry=\"4\" fill=\"white\" stroke=\"#333\" stroke-width=\"1\"/>"
 
 proc cornerSvg(rankStr: string; suitSym: string; x: float; y: float): string =
+  ## Rank and suit text for a card corner at (x, y).
   "<text x=\"" & $x & "\" y=\"" & $y & "\" font-size=\"12\">" & rankStr & suitSym & "</text>"
 
 proc numberCardPips*(card: Card): string =
@@ -47,7 +52,7 @@ proc numberCardPips*(card: Card): string =
   else: ""
 
 proc faceCardCenter*(card: Card): string =
-  ## SVG for center of face card (J, Q, K): simple geometric face (crown for K, etc.).
+  ## SVG for center of face card (J, Q, K): single letter (J/Q/K) as placeholder.
   let cx = float(CardW) / 2
   let cy = float(CardH) / 2
   case card.rank

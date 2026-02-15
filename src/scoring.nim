@@ -6,9 +6,11 @@ import poker
 
 type
   JokerEffectKind* = enum
+    ## How a Joker modifies score: add to chips, add to mult, or multiply mult.
     AddChips, AddMult, MultMult
 
   Joker* = object
+    ## Passive modifier; effect and value are applied in computeScore.
     name*: string
     effect*: JokerEffectKind
     value*: int

@@ -10,12 +10,13 @@ when defined(js):
   import shop
   import ui
 
-  var gRunState: RunState
-  var gRoundState: RoundState
-  var gSelected: seq[int]
-  var gMode: string = "round"
+  var gRunState: RunState   ## Run-level state (progress, money, deck, Jokers).
+  var gRoundState: RoundState  ## Current round (hand, deck, target).
+  var gSelected: seq[int]  ## Indices of cards currently selected for play (max 5).
+  var gMode: string = "round"  ## "round" | "shop" | "win" | "lose".
 
   proc render() =
+    ## Refresh the DOM for the current mode (round, shop, win, or lose).
     if gMode == "round":
       ui.renderGame(gRoundState.hand, gSelected, 0, gRoundState.targetChips, gRoundState.handsLeft)
     elif gMode == "shop":
@@ -26,6 +27,7 @@ when defined(js):
       ui.renderLose()
 
   proc onPlayHand() =
+    ## Play the 5 selected cards; update state for RoundWon / HandConsumed / GameOver and re-render.
     if gSelected.len != 5: return
     let res = gRoundState.playHand(gSelected)
     gSelected = @[]
@@ -45,6 +47,7 @@ when defined(js):
     render()
 
   proc startNewRound() =
+    ## Start a new round: shuffle, draw 8, set mode to round, and render.
     gMode = "round"
     gRoundState = startRound(
       gRunState.handsPerRound,
@@ -57,6 +60,7 @@ when defined(js):
     render()
 
   proc run() =
+    ## Initialize state, draw first round, and attach click handler for cards / Play / Next.
     gRunState = initRunState()
     startNewRound()
     let el = document.getElementById("game")
@@ -70,7 +74,7 @@ when defined(js):
         if dataPlay != "": onPlayHand()
         elif dataNext != "": startNewRound()
         elif dataIndex != "":
-          let idx = parseInt(dataIndex)
+          let idx = parseInt($dataIndex)
           let pos = gSelected.find(idx)
           if pos >= 0: gSelected.del(pos)
           elif gSelected.len < 5: gSelected.add(idx)

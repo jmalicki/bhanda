@@ -1,7 +1,6 @@
 ## Tests for cards and deck operations.
 
 import std/unittest
-import std/random
 import ../src/cards
 
 suite "deck":

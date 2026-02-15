@@ -5,16 +5,20 @@ import std/random
 
 type
   Suit* = enum
+    ## Standard playing card suit.
     Spades, Hearts, Diamonds, Clubs
 
   Rank* = enum
+    ## Card rank; R2 = 2 through R10 = 10, then Jack/Queen/King/Ace (int 11–14).
     R2 = 2, R3, R4, R5, R6, R7, R8, R9, R10, Jack, Queen, King, Ace
 
   Card* = object
+    ## Single playing card: suit and rank.
     suit*: Suit
     rank*: Rank
 
   Deck* = object
+    ## Draw pile; cards are taken from the end of the sequence (top of deck).
     cards*: seq[Card]
 
 proc newDeck*(): Deck =
