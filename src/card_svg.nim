@@ -14,6 +14,12 @@ proc suitSymbol(s: Suit): string =
   of Diamonds: "♦"
   of Clubs: "♣"
 
+proc suitColor(s: Suit): string =
+  ## Fill color for the suit (red for hearts/diamonds, black for spades/clubs).
+  case s
+  of Hearts, Diamonds: "#c00"
+  of Spades, Clubs: "#222"
+
 proc rankStr(r: Rank): string =
   ## Short string for rank (2–10, J, Q, K, A).
   const a: array[2..14, string] = ["2", "3", "4", "5", "6", "7", "8", "9", "10", "J", "Q", "K", "A"]
@@ -22,15 +28,16 @@ proc rankStr(r: Rank): string =
 proc pipSvg(suit: Suit; x, y: float): string =
   ## One suit symbol as SVG text at (x, y).
   let s = suitSymbol(suit)
-  "<text x=\"" & $x & "\" y=\"" & $y & "\" text-anchor=\"middle\" font-size=\"14\">" & s & "</text>"
+  let fill = suitColor(suit)
+  "<text x=\"" & $x & "\" y=\"" & $y & "\" text-anchor=\"middle\" font-size=\"14\" fill=\"" & fill & "\">" & s & "</text>"
 
 proc cardFrameSvg(): string =
   ## Rounded white rectangle with border (card outline).
   "<rect x=\"1\" y=\"1\" width=\"" & $CardW & "\" height=\"" & $CardH & "\" rx=\"4\" ry=\"4\" fill=\"white\" stroke=\"#333\" stroke-width=\"1\"/>"
 
-proc cornerSvg(rankStr: string; suitSym: string; x: float; y: float): string =
+proc cornerSvg(rankStr: string; suitSym: string; x: float; y: float; fill: string): string =
   ## Rank and suit text for a card corner at (x, y).
-  "<text x=\"" & $x & "\" y=\"" & $y & "\" font-size=\"12\">" & rankStr & suitSym & "</text>"
+  "<text x=\"" & $x & "\" y=\"" & $y & "\" font-size=\"12\" fill=\"" & fill & "\">" & rankStr & suitSym & "</text>"
 
 proc numberCardPips*(card: Card): string =
   ## SVG for center pips of a number card (2–10, Ace). One pip per rank count in standard layout.
@@ -55,10 +62,11 @@ proc faceCardCenter*(card: Card): string =
   ## SVG for center of face card (J, Q, K): single letter (J/Q/K) as placeholder.
   let cx = float(CardW) / 2
   let cy = float(CardH) / 2
+  let fill = suitColor(card.suit)
   case card.rank
-  of Jack: "<text x=\"" & $cx & "\" y=\"" & $cy & "\" text-anchor=\"middle\" font-size=\"24\">J</text>"
-  of Queen: "<text x=\"" & $cx & "\" y=\"" & $cy & "\" text-anchor=\"middle\" font-size=\"24\">Q</text>"
-  of King: "<text x=\"" & $cx & "\" y=\"" & $cy & "\" text-anchor=\"middle\" font-size=\"24\">K</text>"
+  of Jack: "<text x=\"" & $cx & "\" y=\"" & $cy & "\" text-anchor=\"middle\" font-size=\"24\" fill=\"" & fill & "\">J</text>"
+  of Queen: "<text x=\"" & $cx & "\" y=\"" & $cy & "\" text-anchor=\"middle\" font-size=\"24\" fill=\"" & fill & "\">Q</text>"
+  of King: "<text x=\"" & $cx & "\" y=\"" & $cy & "\" text-anchor=\"middle\" font-size=\"24\" fill=\"" & fill & "\">K</text>"
   else: ""
 
 proc cardToSvg*(card: Card): string =
@@ -67,8 +75,9 @@ proc cardToSvg*(card: Card): string =
   result &= cardFrameSvg()
   let rs = rankStr(card.rank)
   let ss = suitSymbol(card.suit)
-  result &= cornerSvg(rs, ss, 6.0, 14.0)
-  result &= cornerSvg(rs, ss, float(CardW) - 6.0, float(CardH) - 4.0)
+  let fill = suitColor(card.suit)
+  result &= cornerSvg(rs, ss, 6.0, 14.0, fill)
+  result &= cornerSvg(rs, ss, float(CardW) - 6.0, float(CardH) - 4.0, fill)
   if int(card.rank) >= 2 and int(card.rank) <= 10 or card.rank == Ace:
     result &= numberCardPips(card)
   else:
