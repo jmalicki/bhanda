@@ -5,8 +5,197 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Bhanda</title>
   <style>
-    body { margin: 0; background: #1a1a2e; color: #eee; font-family: system-ui, sans-serif; }
-    #game { min-height: 100vh; display: flex; align-items: center; justify-content: center; }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      min-height: 100vh;
+      background: #0f1410 radial-gradient(ellipse 120% 80% at 50% 50%, #1a2a1e 0%, #0a120d 70%);
+      color: #e8e8e8;
+      font-family: "Segoe UI", system-ui, sans-serif;
+      overflow-x: hidden;
+    }
+    #game {
+      min-height: 100vh;
+      padding: 1rem;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      position: relative;
+    }
+    .table-wrap {
+      position: relative;
+      width: 100%;
+      max-width: 720px;
+    }
+    /* Card table: green felt with wood trim */
+    .table {
+      width: 100%;
+      max-width: 720px;
+      background: linear-gradient(160deg, #1e5631 0%, #16532a 30%, #0f3d20 100%);
+      border: 12px solid #4a3728;
+      border-radius: 24px;
+      box-shadow:
+        inset 0 0 80px rgba(0,0,0,0.25),
+        0 8px 0 #2d2218,
+        0 12px 24px rgba(0,0,0,0.5);
+      padding: 0;
+      position: relative;
+      overflow: hidden;
+    }
+    .table::before {
+      content: "";
+      position: absolute;
+      inset: 4px;
+      border-radius: 14px;
+      border: 1px solid rgba(255,255,255,0.06);
+      pointer-events: none;
+    }
+    /* Blind / stats strip at top of table */
+    .table-blind {
+      background: rgba(0,0,0,0.35);
+      padding: 0.6rem 1.25rem;
+      display: flex;
+      gap: 2rem;
+      flex-wrap: wrap;
+      justify-content: center;
+      font-size: 0.95rem;
+      font-weight: 600;
+      letter-spacing: 0.02em;
+    }
+    .table-blind span { color: #b8d4be; }
+    .table-blind .value { color: #fff; margin-left: 0.25rem; }
+    /* Play zone: "select 5 cards" area */
+    .table-play-zone {
+      padding: 1rem 1.25rem;
+      min-height: 100px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border-bottom: 2px dashed rgba(255,255,255,0.12);
+    }
+    .table-play-zone .hint {
+      color: rgba(255,255,255,0.5);
+      font-size: 0.9rem;
+    }
+    /* Hand area: your cards */
+    .hand-area {
+      padding: 1.25rem;
+    }
+    .hand-area .label {
+      text-align: center;
+      font-size: 0.75rem;
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      color: rgba(255,255,255,0.4);
+      margin-bottom: 0.75rem;
+    }
+    .hand-cards {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+      justify-content: center;
+      min-height: 120px;
+    }
+    .hand-cards > div {
+      cursor: pointer;
+      border-radius: 10px;
+      transition: transform 0.12s ease, box-shadow 0.12s ease;
+    }
+    .hand-cards > div:hover { transform: translateY(-4px); }
+    .hand-cards > div.selected {
+      box-shadow: 0 0 0 4px #e8c547;
+      transform: translateY(-6px);
+      border-radius: 10px;
+    }
+    /* Actions: game buttons */
+    .table-actions {
+      padding: 1rem 1.25rem 1.25rem;
+      display: flex;
+      gap: 0.75rem;
+      flex-wrap: wrap;
+      justify-content: center;
+    }
+    .btn {
+      padding: 0.6rem 1.25rem;
+      border: none;
+      border-radius: 10px;
+      font-size: 0.95rem;
+      font-weight: 600;
+      cursor: pointer;
+      background: linear-gradient(180deg, #c9a227 0%, #9a7b1a 100%);
+      color: #1a1508;
+      box-shadow: 0 3px 0 #6b5512, 0 4px 8px rgba(0,0,0,0.3);
+      transition: transform 0.1s, box-shadow 0.1s;
+    }
+    .btn:hover {
+      transform: translateY(-1px);
+      box-shadow: 0 4px 0 #6b5512, 0 6px 12px rgba(0,0,0,0.35);
+    }
+    .btn:active {
+      transform: translateY(2px);
+      box-shadow: 0 1px 0 #6b5512, 0 2px 4px rgba(0,0,0,0.3);
+    }
+    .btn-secondary {
+      background: linear-gradient(180deg, #5a5a5a 0%, #3d3d3d 100%);
+      color: #e0e0e0;
+      box-shadow: 0 3px 0 #2a2a2a, 0 4px 8px rgba(0,0,0,0.3);
+    }
+    .btn-secondary:hover { box-shadow: 0 4px 0 #2a2a2a, 0 6px 12px rgba(0,0,0,0.35); }
+    .btn-secondary:active { box-shadow: 0 1px 0 #2a2a2a, 0 2px 4px rgba(0,0,0,0.3); }
+    /* Instructions panel - corner */
+    .instructions {
+      position: absolute;
+      top: 1rem;
+      right: 1rem;
+      width: 200px;
+      background: rgba(20,25,22,0.95);
+      border: 2px solid #3d4a3f;
+      border-radius: 10px;
+      padding: 0.75rem 1rem;
+      font-size: 0.8rem;
+      line-height: 1.4;
+      color: #b0b8b2;
+      box-shadow: 0 4px 16px rgba(0,0,0,0.4);
+    }
+    .instructions h3 {
+      margin: 0 0 0.5rem;
+      font-size: 0.85rem;
+      color: #e0e8e0;
+    }
+    .instructions ul { margin: 0; padding-left: 1rem; }
+    .instructions li { margin-bottom: 0.25rem; }
+    /* Shop on table */
+    .table-shop {
+      padding: 1.25rem;
+    }
+    .table-shop .shop-title {
+      text-align: center;
+      font-size: 1.1rem;
+      font-weight: 600;
+      margin-bottom: 0.5rem;
+      color: #fff;
+    }
+    .table-shop .shop-money {
+      text-align: center;
+      font-size: 1rem;
+      color: #c9a227;
+      margin-bottom: 1rem;
+    }
+    .shop-items {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.5rem;
+      justify-content: center;
+      margin-bottom: 1rem;
+    }
+    .shop-items .btn { white-space: nowrap; }
+    /* Win/lose on table */
+    .end-screen {
+      text-align: center;
+      padding: 2.5rem 1.5rem;
+    }
+    .end-screen h2 { margin: 0 0 0.5rem; font-size: 1.5rem; color: #fff; }
+    .end-screen p { margin: 0 0 1.25rem; color: rgba(255,255,255,0.6); }
   </style>
 </head>
 <body>
