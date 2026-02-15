@@ -38,6 +38,7 @@ when defined(js):
     html &= renderHand(hand, selected)
     if selected.len == 5:
       html &= "<p><button data-play=\"1\">Play hand</button></p>"
+    html &= "<p><button data-new=\"1\">Reset</button></p>"
     setGameHtml(html)
 
   proc renderShop*(items: seq[shop.ShopItem]; money: int) =
@@ -46,7 +47,8 @@ when defined(js):
     for i, it in items:
       html &= "<button data-buy=\"" & $i & "\">" & it.joker.name & " ($" & $it.price & ")</button> "
     html &= "<button data-skip>Skip</button> "
-    html &= "<button data-next>Next round</button>"
+    html &= "<button data-next>Next round</button> "
+    html &= "<button data-new=\"1\">Reset</button>"
     setGameHtml(html)
 
   proc renderWin*() =

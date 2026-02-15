@@ -4,16 +4,21 @@
 when defined(js):
   import std/dom
   import std/strutils
+  import std/options
   import game
   import round
   import blinds
   import shop
   import ui
+  import storage
 
   var gRunState: RunState   ## Run-level state (progress, money, deck, Jokers).
   var gRoundState: RoundState  ## Current round (hand, deck, target).
   var gSelected: seq[int]  ## Indices of cards currently selected for play (max 5).
   var gMode: string = "round"  ## "round" | "shop" | "win" | "lose".
+
+  proc saveCurrent() =
+    saveState(gRunState, gRoundState, gMode)
 
   proc render() =
     ## Refresh the DOM for the current mode (round, shop, win, or lose).
@@ -40,10 +45,12 @@ when defined(js):
         gMode = "win"
       else:
         gMode = "shop"
+      saveCurrent()
     of HandConsumed:
-      discard
+      saveCurrent()
     of GameOver:
       gMode = "lose"
+      clearState()
     render()
 
   proc startNewRound() =
@@ -57,12 +64,22 @@ when defined(js):
       gRunState.jokers)
     gRunState.deck = gRoundState.deck
     gSelected = @[]
+    saveCurrent()
     render()
 
   proc run() =
-    ## Initialize state, draw first round, and attach click handler for cards / Play / Next.
-    gRunState = initRunState()
-    startNewRound()
+    ## State is saved automatically at key points (after play, new round, leave shop). On load, restore from localStorage if present. Reset button clears and starts fresh.
+    let loaded = loadState()
+    if loaded.isSome:
+      let L = loaded.get()
+      gRunState = L.runState
+      gRoundState = L.roundState
+      gMode = L.mode
+      gSelected = @[]
+      render()
+    else:
+      gRunState = initRunState()
+      startNewRound()
     let el = document.getElementById("game")
     if not el.isNil:
       el.addEventListener("click", proc(ev: Event) =
@@ -71,8 +88,13 @@ when defined(js):
         let dataIndex = target.getAttribute("data-index")
         let dataPlay = target.getAttribute("data-play")
         let dataNext = target.getAttribute("data-next")
+        let dataNew = target.getAttribute("data-new")
         if dataPlay != "": onPlayHand()
         elif dataNext != "": startNewRound()
+        elif dataNew != "":
+          clearState()
+          gRunState = initRunState()
+          startNewRound()
         elif dataIndex != "":
           let idx = parseInt($dataIndex)
           let pos = gSelected.find(idx)

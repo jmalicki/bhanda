@@ -30,6 +30,7 @@ task lint, "Run compiler check on source and tests":
   exec "nim check src/shop.nim"
   exec "nim check src/game.nim"
   exec "nim check src/card_svg.nim"
+  exec "nim check src/storage.nim"
   exec "nim check src/ui.nim"
   exec "nim check src/main.nim"
   exec "nim check tests/run_tests.nim"
