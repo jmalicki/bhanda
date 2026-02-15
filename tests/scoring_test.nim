@@ -32,3 +32,12 @@ suite "computeScore":
     ]
     let (c, m) = baseChipsAndMult(Flush)
     check computeScore(Flush, @[], jokers) == (c + 30) * (m * 2)
+
+  test "card rank (level) adds to chips (Balatro-style)":
+    let hand = @[
+      Card(suit: Hearts, rank: Ace), Card(suit: Diamonds, rank: Ace),
+      Card(suit: Clubs, rank: R2), Card(suit: Spades, rank: R3), Card(suit: Hearts, rank: R4)
+    ]
+    let (baseC, baseM) = baseChipsAndMult(Pair)
+    let level = 14 + 14 + 2 + 3 + 4
+    check computeScore(Pair, hand, @[]) == (baseC + level) * baseM

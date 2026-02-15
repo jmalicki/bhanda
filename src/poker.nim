@@ -12,8 +12,8 @@ type
   ChipsMult* = tuple[chips: int, mult: int]
     ## Base chips and mult for a hand type; final score = chips * mult (before Jokers).
 
-proc rankValue(r: Rank): int =
-  ## Numeric value for straight comparison. Ace high = 14; ace low (wheel) = 1.
+proc rankValue*(r: Rank): int =
+  ## Numeric value for straight comparison and for chip "level". Ace high = 14; ace low (wheel) = 1.
   if r == Ace: 14 else: int(r)
 
 proc isFlush(cards: seq[Card]): bool =

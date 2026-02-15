@@ -1,5 +1,5 @@
-## Score calculation: base Chips/Mult from hand type plus Joker effects.
-## Jokers add flat Chips, flat Mult, or multiply Mult.
+## Score calculation: base Chips/Mult from hand type, card rank (level), and Joker effects.
+## Balatro-style: Chips = base chips + sum of card rank values (level); then Jokers add/multiply.
 
 import cards
 import poker
@@ -16,9 +16,11 @@ type
     value*: int
 
 proc computeScore*(handKind: PokerHandKind; cards: seq[Card]; jokers: seq[Joker]): int =
-  ## Final score = (baseChips + chip bonuses) * (baseMult * mult multiplier).
-  ## Jokers are applied in order: AddChips adds to chips, AddMult adds to mult, MultMult multiplies mult.
+  ## Balatro-style score: Chips = base chips + level (sum of card rank values) + Joker chip bonuses;
+  ## Mult = base mult, then + Joker add mult, then × Joker mult; final = Chips × Mult.
   var (chips, mult) = baseChipsAndMult(handKind)
+  for c in cards:
+    chips += rankValue(c.rank)
   for j in jokers:
     case j.effect
     of AddChips: chips += j.value

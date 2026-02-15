@@ -4,7 +4,7 @@ A poker roguelike deck-builder in Nim (in the style of Balatro). Play poker hand
 
 ## Play
 
-**[Play Bhanda](docs/index.html)** — the in-repo game. CI builds and publishes it to **GitHub Pages** on every push to `main`. In the repo **Settings → Pages → Source**, choose **GitHub Actions**; the site will be at `https://<user>.github.io/bhanda/`.
+**[Play Bhanda](https://jmalicki.github.io/bhanda/)** — play in the browser. (In-repo build: [docs/index.html](docs/index.html). CI publishes to GitHub Pages on every push to `main`.)
 
 ## Requirements
 
