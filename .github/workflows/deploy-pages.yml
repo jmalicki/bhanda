@@ -42,7 +42,7 @@ jobs:
         run: nimble buildjs
 
       - name: Copy to docs
-        run: cp bhanda.js docs/bhanda.js
+        run: cp build/bhanda.js docs/bhanda.js
 
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v3
