@@ -8,6 +8,8 @@ srcDir        = "src"
 binDir        = "."
 
 # Dependencies (none required for JS build)
+# testE2e task: nimhttpd (static server); nim-playwright in vendor/ (Frame/click API)
+requires "nimhttpd >= 1.0.0"
 
 # Tasks
 
@@ -20,6 +22,12 @@ task deploy, "Build and copy bhanda.js to docs/ for GitHub Pages (playable in br
 
 task test, "Run all tests (C backend)":
   exec "nim c -r tests/run_tests.nim"
+
+task testE2e, "E2E test with Playwright (builds JS, serves docs/ via nimhttpd, runs browser test; needs Node + npx)":
+  exec "nimble buildjs"
+  exec "cp bhanda.js docs/bhanda.js"
+  exec "npx -y playwright install chromium"
+  exec "bash tests/run_e2e.sh"
 
 task lint, "Run compiler check on source and tests":
   exec "nim check src/cards.nim"

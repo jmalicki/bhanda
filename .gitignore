@@ -3,6 +3,7 @@ nimcache/
 *.exe
 # Root build output (do not commit; use docs/ for playable deployment)
 bhanda.js
+serve_docs
 # Allow the playable bundle in docs/ for GitHub Pages
 !docs/bhanda.js
 
@@ -17,3 +18,4 @@ Thumbs.db
 # Build artifacts
 htmldocs/
 tests/run_tests
+tests/e2e_bhanda
