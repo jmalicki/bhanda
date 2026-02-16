@@ -131,6 +131,7 @@ when defined(js):
         tdiv(class = "table"):
           if gMode == "round":
             tdiv(class = "table-blind"):
+              span: text blindDisplayName(gRunState.progress.currentBlind())
               span: text "Target"
               span(class = "value"): text $gRoundState.targetChips
               span: text "Score"

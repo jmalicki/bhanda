@@ -26,6 +26,12 @@ proc currentBlind*(progress: RunProgress): BlindKind =
   of 2: BossBlind
   else: BossBlind
 
+proc blindDisplayName*(blind: BlindKind): string =
+  case blind
+  of SmallBlind: "Small blind"
+  of BigBlind: "Big blind"
+  of BossBlind: "Boss"
+
 proc advanceRound*(progress: var RunProgress) =
   ## After winning a round: next round in ante, or next ante if we beat the boss.
   progress.roundInAnte += 1
