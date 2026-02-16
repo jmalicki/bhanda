@@ -221,9 +221,39 @@
     }
     .end-screen h2 { margin: 0 0 0.5rem; font-size: 1.5rem; color: #fff; }
     .end-screen p { margin: 0 0 1.25rem; color: rgba(255,255,255,0.6); }
+    /* Page intro */
+    .page-intro {
+      text-align: center;
+      padding: 0.75rem 1rem 0.5rem;
+      max-width: 720px;
+      margin: 0 auto;
+      font-size: 0.9rem;
+      line-height: 1.5;
+      color: rgba(255,255,255,0.7);
+    }
+    .page-intro h1 {
+      margin: 0 0 0.35rem;
+      font-size: 1.35rem;
+      font-weight: 600;
+      color: #fff;
+    }
+    .page-intro p { margin: 0; }
+    .page-intro a {
+      color: #b8d4be;
+      text-decoration: none;
+    }
+    .page-intro a:hover { text-decoration: underline; }
   </style>
 </head>
 <body>
+  <header class="page-intro">
+    <h1>Bhanda</h1>
+    <p>
+      A browser clone of <a href="https://en.wikipedia.org/wiki/Balatro" target="_blank" rel="noopener noreferrer">Balatro</a> (poker roguelike).
+      <em>Bhanda</em> is Sanskrit for jester; <em>Balatro</em> is Latin for jester.
+      <a href="https://github.com/jmalicki/bhanda" target="_blank" rel="noopener noreferrer">Source on GitHub</a>.
+    </p>
+  </header>
   <div id="game">Loading…</div>
   <script src="bhanda.js"></script>
 </body>
