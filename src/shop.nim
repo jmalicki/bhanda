@@ -33,11 +33,14 @@ proc skip*(shop: ShopState) =
 const
   shopCatalog* = [
     ShopItem(joker: Joker(name: "+50 Chips", effect: AddChips, value: 50), price: 4),
+    ShopItem(joker: Joker(name: "+40 Chips", effect: AddChips, value: 40), price: 4),
     ShopItem(joker: Joker(name: "+30 Chips", effect: AddChips, value: 30), price: 3),
+    ShopItem(joker: Joker(name: "+20 Chips", effect: AddChips, value: 20), price: 2),
+    ShopItem(joker: Joker(name: "+15 Chips", effect: AddChips, value: 15), price: 2),
     ShopItem(joker: Joker(name: "+1 Mult", effect: AddMult, value: 1), price: 4),
     ShopItem(joker: Joker(name: "+2 Mult", effect: AddMult, value: 2), price: 6),
+    ShopItem(joker: Joker(name: "+3 Mult", effect: AddMult, value: 3), price: 8),
     ShopItem(joker: Joker(name: "×2 Mult", effect: MultMult, value: 2), price: 5),
-    ShopItem(joker: Joker(name: "+15 Chips", effect: AddChips, value: 15), price: 2),
   ]
 
 proc generateOfferings*(count: int = 4): ShopState =
