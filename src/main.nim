@@ -102,6 +102,15 @@ when defined(js):
   proc sellClick(i: int): proc() =
     result = proc() = onSell(i)
 
+  proc handLevelsText(): string =
+    var parts: seq[string]
+    for k in PokerHandKind:
+      if gRunState.handLevels[k] > 1:
+        parts.add handDisplayName(k) & " " & $gRunState.handLevels[k]
+    if parts.len == 0: return ""
+    result = parts[0]
+    for i in 1 ..< parts.len: result.add ", "; result.add parts[i]
+
   const rerollCost = 1
   proc onReroll() =
     if gRunState.money >= rerollCost:
@@ -136,6 +145,10 @@ when defined(js):
           ul:
             for j in gRunState.jokers:
               li: text j.name
+      if handLevelsText().len > 0:
+        tdiv(class = "hand-levels"):
+          h3: text "Hand levels"
+          p: text handLevelsText()
       tdiv(class = "sidebar-reset"):
         p(class = "sidebar-reset-label"): text "Start over (clears saved progress)"
         button(class = "btn", `data-new` = "1", onclick = doNewRun): text "New run"
