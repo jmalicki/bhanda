@@ -118,6 +118,26 @@ when defined(js):
       gShopState = generateOfferings()
       saveCurrent()
 
+  const voucherPrice = 4
+  proc onBuyVoucherHand() =
+    if not gRunState.boughtExtraHand and gRunState.money >= voucherPrice:
+      gRunState.money -= voucherPrice
+      gRunState.boughtExtraHand = true
+      gRunState.handsPerRound += 1
+      saveCurrent()
+  proc onBuyVoucherDiscard() =
+    if not gRunState.boughtExtraDiscard and gRunState.money >= voucherPrice:
+      gRunState.money -= voucherPrice
+      gRunState.boughtExtraDiscard = true
+      gRunState.discardsPerRound += 1
+      saveCurrent()
+  proc onBuyVoucherJokerSlot() =
+    if not gRunState.boughtExtraJokerSlot and gRunState.money >= voucherPrice:
+      gRunState.money -= voucherPrice
+      gRunState.boughtExtraJokerSlot = true
+      gRunState.maxJokerSlots += 1
+      saveCurrent()
+
   proc sidebar(): VNode =
     result = buildHtml(tdiv(class = "sidebar")):
       tdiv(class = "instructions"):
@@ -223,6 +243,17 @@ when defined(js):
                     let j = gRunState.jokers[i]
                     button(class = "btn btn-secondary", onclick = sellClick(i)):
                       text j.name & " — Sell ($" & $sellPrice & ")"
+              tdiv(class = "shop-vouchers"):
+                p(class = "shop-vouchers-label"): text "Vouchers (permanent):"
+                if not gRunState.boughtExtraHand:
+                  button(class = "btn btn-voucher", onclick = onBuyVoucherHand):
+                    text "+1 Hand — $" & $voucherPrice
+                if not gRunState.boughtExtraDiscard:
+                  button(class = "btn btn-voucher", onclick = onBuyVoucherDiscard):
+                    text "+1 Discard — $" & $voucherPrice
+                if not gRunState.boughtExtraJokerSlot:
+                  button(class = "btn btn-voucher", onclick = onBuyVoucherJokerSlot):
+                    text "+1 Joker slot — $" & $voucherPrice
               tdiv(class = "shop-items"):
                 for i in 0 ..< gShopState.items.len:
                   let it = gShopState.items[i]

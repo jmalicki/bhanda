@@ -61,6 +61,9 @@ when defined(js):
       j["handLevels"].add %runState.handLevels[k]
     j["handsPerRound"] = %runState.handsPerRound
     j["discardsPerRound"] = %runState.discardsPerRound
+    j["boughtExtraHand"] = %runState.boughtExtraHand
+    j["boughtExtraDiscard"] = %runState.boughtExtraDiscard
+    j["boughtExtraJokerSlot"] = %runState.boughtExtraJokerSlot
     j["handsLeft"] = %roundState.handsLeft
     j["discardsLeft"] = %roundState.discardsLeft
     j["hand"] = newJArray()
@@ -100,6 +103,9 @@ when defined(js):
         for k in PokerHandKind: run.handLevels[k] = 1
       run.handsPerRound = j["handsPerRound"].getInt(4)
       run.discardsPerRound = j["discardsPerRound"].getInt(2)
+      run.boughtExtraHand = if j.hasKey("boughtExtraHand"): j["boughtExtraHand"].getBool(false) else: false
+      run.boughtExtraDiscard = if j.hasKey("boughtExtraDiscard"): j["boughtExtraDiscard"].getBool(false) else: false
+      run.boughtExtraJokerSlot = if j.hasKey("boughtExtraJokerSlot"): j["boughtExtraJokerSlot"].getBool(false) else: false
       var roundSt: RoundState
       roundSt.handsLeft = j["handsLeft"].getInt(4)
       roundSt.discardsLeft = j["discardsLeft"].getInt(2)

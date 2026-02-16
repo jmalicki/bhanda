@@ -21,6 +21,9 @@ type
     handLevels*: array[PokerHandKind, int]
     handsPerRound*: int
     discardsPerRound*: int
+    boughtExtraHand*: bool
+    boughtExtraDiscard*: bool
+    boughtExtraJokerSlot*: bool
 
 proc initRunState*(): RunState =
   ## Default state for a new run: ante 1, 10 money, full deck, 5 Joker slots, 4 hands / 2 discards per round.
@@ -32,3 +35,6 @@ proc initRunState*(): RunState =
   for k in PokerHandKind: result.handLevels[k] = 1
   result.handsPerRound = 4
   result.discardsPerRound = 2
+  result.boughtExtraHand = false
+  result.boughtExtraDiscard = false
+  result.boughtExtraJokerSlot = false
