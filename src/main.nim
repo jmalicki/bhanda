@@ -82,25 +82,30 @@ when defined(js):
         ul:
           li: text "Click 5 cards to select your hand."
           li:
+            text "The "
+            strong: text "Score"
+            text " shown is your projected score for that selection (0 until you pick 5 cards). "
+            strong: text "Target"
+            text " is what you need to reach to beat the blind."
+          li:
             text "Hit "
             strong: text "Play hand"
-            text " — score must meet the target."
-          li: text "Beat the blind to earn $ and advance."
+            text " — if your score meets the target, you beat the blind and earn $."
           li: text "Spend money in the shop on Jokers, then start the next round."
       tdiv(class = "sidebar-reset"):
         p(class = "sidebar-reset-label"): text "Start over (clears saved progress)"
         button(class = "btn", `data-new` = "1", onclick = doNewRun): text "New run"
 
-  proc handPreviewText(): string =
-    if gSelected.len != 5: return ""
+  proc handPreview(): tuple[text: string, score: int] =
+    if gSelected.len != 5: return ("", 0)
     var selCards: seq[Card]
     for idx in gSelected: selCards.add gRoundState.hand[idx]
     let kind = detectPokerHand(selCards)
     let score = computeScore(kind, selCards, gRoundState.jokers)
-    "Hand: " & handDisplayName(kind) & " — Score: " & $score
+    ("Hand: " & handDisplayName(kind) & " — Score: " & $score, score)
 
   proc createDom(): VNode =
-    let playHint = handPreviewText()
+    let (playHint, projectedScore) = handPreview()
     result = buildHtml(tdiv(class = "game-layout")):
       tdiv(class = "table-wrap"):
         tdiv(class = "table"):
@@ -109,7 +114,7 @@ when defined(js):
               span: text "Target"
               span(class = "value"): text $gRoundState.targetChips
               span: text "Score"
-              span(class = "value"): text "0"
+              span(class = "value"): text $projectedScore
               span: text "Hands left"
               span(class = "value"): text $gRoundState.handsLeft
             tdiv(class = "table-play-zone"):
