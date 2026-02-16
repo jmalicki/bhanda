@@ -1,13 +1,11 @@
 #!/usr/bin/env bash
-# Serve docs/ with nimhttpd, then run E2E test against local build.
+# Build E2E binary and runner, then run E2E (runner finds port, starts nimhttpd, runs test).
+# Port and server logic live in Nim (tests/e2e_runner.nim). Timeout 90s to avoid hangs.
 set -e
 cd "$(dirname "$0")/.."
-PORT=8765
-# Run nimhttpd (from nimble) in background: serve docs/ at PORT
 export PATH="${HOME}/.nimble/bin:${PATH:-}"
-nimhttpd -p:$PORT -a:127.0.0.1 docs &
-SERVPID=$!
-cleanup() { kill $SERVPID 2>/dev/null || true; }
-trap cleanup EXIT
-sleep 1
-BHANDA_E2E_URL="http://127.0.0.1:$PORT/" nim c -p:vendor/nim-playwright/src -r tests/e2e_bhanda.nim
+
+mkdir -p build
+nim c -o:build/e2e_runner tests/e2e_runner.nim
+nim c -o:build/e2e_bhanda -p:vendor/nim-playwright/src tests/e2e_bhanda.nim
+exec timeout 90 ./build/e2e_runner
