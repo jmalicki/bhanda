@@ -12,23 +12,23 @@ type
   ChipsMult* = tuple[chips: int, mult: int]
     ## Base chips and mult for a hand type; final score = chips * mult (before Jokers).
 
-proc rankValue*(r: Rank): int =
+func rankValue*(r: Rank): int =
   ## Numeric value for straight comparison and for chip "level". Ace high = 14; ace low (wheel) = 1.
   if r == Ace: 14 else: int(r)
 
-proc isFlush(cards: seq[Card]): bool =
+func isFlush(cards: seq[Card]): bool =
   ## True if all 5 cards share the same suit.
   let s = cards[0].suit
   for c in cards:
     if c.suit != s: return false
   true
 
-proc cardRankOrder(cards: seq[Card]): seq[Card] =
+func cardRankOrder(cards: seq[Card]): seq[Card] =
   ## Return a copy of cards sorted by rank (low to high) for straight detection.
   result = @cards
   result.sort(proc(a, b: Card): int = cmp(rankValue(a.rank), rankValue(b.rank)))
 
-proc isStraight(cards: seq[Card]): bool =
+func isStraight(cards: seq[Card]): bool =
   ## Assumes cards sorted by rank. Handles wheel (A-2-3-4-5).
   if cards.len != 5: return false
   let v0 = rankValue(cards[0].rank)
@@ -37,12 +37,12 @@ proc isStraight(cards: seq[Card]): bool =
   if v4 == 14 and cards[0].rank == R2 and cards[1].rank == R3 and cards[2].rank == R4 and cards[3].rank == R5: return true
   false
 
-proc countRanks(cards: seq[Card]): array[2..14, int] =
+func countRanks(cards: seq[Card]): array[2..14, int] =
   ## Count of each rank (index 2..14) in the hand; used for pairs, trips, etc.
   for r in 2..14: result[r] = 0
   for c in cards: result[int(c.rank)] += 1
 
-proc detectPokerHand*(cards: seq[Card]): PokerHandKind =
+func detectPokerHand*(cards: seq[Card]): PokerHandKind =
   ## Classify the best poker hand from exactly 5 cards.
   if cards.len != 5: return HighCard
   let byRank = countRanks(cards)
@@ -63,7 +63,7 @@ proc detectPokerHand*(cards: seq[Card]): PokerHandKind =
   if counts.len >= 1 and counts[0] == 2: return Pair
   HighCard
 
-proc baseChipsAndMult*(kind: PokerHandKind): ChipsMult =
+func baseChipsAndMult*(kind: PokerHandKind): ChipsMult =
   ## Base chips and mult for each hand type.
   case kind
   of HighCard:     (10, 1)
@@ -76,7 +76,7 @@ proc baseChipsAndMult*(kind: PokerHandKind): ChipsMult =
   of FourKind:     (160, 7)
   of StraightFlush:(200, 8)
 
-proc handDisplayName*(kind: PokerHandKind): string =
+func handDisplayName*(kind: PokerHandKind): string =
   ## Human-readable name for UI (e.g. "Two pair").
   case kind
   of HighCard:     "High card"

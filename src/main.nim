@@ -4,6 +4,8 @@
 when defined(js):
   include karax/prelude
   import std/options
+  import std/strutils
+  import std/sugar
   import game
   import round
   import blinds
@@ -15,15 +17,15 @@ when defined(js):
   var gRoundState: RoundState
   var gShopState: ShopState
   var gSelected: seq[int]
-  var gMode: string = "round"
+  var gMode: GameMode = ModeRound
 
   proc saveCurrent() =
     saveState(gRunState, gRoundState, gMode)
 
   proc onPlayHand() =
     if gSelected.len != 5: return
-    var selCards: seq[Card]
-    for idx in gSelected: selCards.add gRoundState.hand[idx]
+    let selCards = collect(newSeq):
+      for idx in gSelected: gRoundState.hand[idx]
     let kind = detectPokerHand(selCards)
     let res = gRoundState.playHand(gSelected)
     gSelected = @[]
@@ -34,21 +36,21 @@ when defined(js):
       gRunState.progress.advanceRound()
       gRunState.money += cashForBlind(blindIdx)
       if gRunState.progress.hasWonRun():
-        gMode = "win"
+        gMode = ModeWin
       else:
-        gMode = "shop"
+        gMode = ModeShop
         gShopState = generateOfferings()
       saveCurrent()
     of HandConsumed:
       saveCurrent()
     of GameOver:
-      gMode = "lose"
+      gMode = ModeLose
       clearState()
 
   proc startNewRound() =
-    if gMode == "shop":
+    if gMode == ModeShop:
       gRunState.money += (gRunState.money * 5) div 100
-    gMode = "round"
+    gMode = ModeRound
     let minHand = if effectForBlind(gRunState.progress) == FlushOrBetter: some(Flush) else: none(PokerHandKind)
     gRoundState = startRound(
       gRunState.handsPerRound,
@@ -103,13 +105,12 @@ when defined(js):
     result = proc() = onSell(i)
 
   proc handLevelsText(): string =
-    var parts: seq[string]
-    for k in PokerHandKind:
-      if gRunState.handLevels[k] > 1:
-        parts.add handDisplayName(k) & " " & $gRunState.handLevels[k]
+    let parts = collect(newSeq):
+      for k in PokerHandKind:
+        if gRunState.handLevels[k] > 1:
+          handDisplayName(k) & " " & $gRunState.handLevels[k]
     if parts.len == 0: return ""
-    result = parts[0]
-    for i in 1 ..< parts.len: result.add ", "; result.add parts[i]
+    result = parts.join(", ")
 
   const rerollCost = 1
   proc onReroll() =
@@ -119,24 +120,15 @@ when defined(js):
       saveCurrent()
 
   const voucherPrice = 4
-  proc onBuyVoucherHand() =
-    if not gRunState.boughtExtraHand and gRunState.money >= voucherPrice:
+  template buyVoucher(flag: untyped, field: untyped) =
+    if not gRunState.flag and gRunState.money >= voucherPrice:
       gRunState.money -= voucherPrice
-      gRunState.boughtExtraHand = true
-      gRunState.handsPerRound += 1
+      gRunState.flag = true
+      gRunState.field += 1
       saveCurrent()
-  proc onBuyVoucherDiscard() =
-    if not gRunState.boughtExtraDiscard and gRunState.money >= voucherPrice:
-      gRunState.money -= voucherPrice
-      gRunState.boughtExtraDiscard = true
-      gRunState.discardsPerRound += 1
-      saveCurrent()
-  proc onBuyVoucherJokerSlot() =
-    if not gRunState.boughtExtraJokerSlot and gRunState.money >= voucherPrice:
-      gRunState.money -= voucherPrice
-      gRunState.boughtExtraJokerSlot = true
-      gRunState.maxJokerSlots += 1
-      saveCurrent()
+  proc onBuyVoucherHand() = buyVoucher(boughtExtraHand, handsPerRound)
+  proc onBuyVoucherDiscard() = buyVoucher(boughtExtraDiscard, discardsPerRound)
+  proc onBuyVoucherJokerSlot() = buyVoucher(boughtExtraJokerSlot, maxJokerSlots)
 
   proc sidebarLeft(): VNode =
     result = buildHtml(tdiv(class = "sidebar sidebar-left")):
@@ -195,22 +187,22 @@ when defined(js):
 
   proc handPreview(): tuple[text: string, score: int] =
     if gSelected.len != 5: return ("", 0)
-    var selCards: seq[Card]
-    for idx in gSelected: selCards.add gRoundState.hand[idx]
+    let selCards = collect(newSeq):
+      for idx in gSelected: gRoundState.hand[idx]
     let kind = detectPokerHand(selCards)
     let score = computeScore(kind, selCards, gRoundState.jokers, gRoundState.handLevels)
     ("Hand: " & handDisplayName(kind) & " — Score: " & $score, score)
 
   proc createDom(): VNode =
-    if gMode == "round" and gRoundState.hand.len < 5:
-      gMode = "lose"
+    if gMode == ModeRound and gRoundState.hand.len < 5:
+      gMode = ModeLose
       clearState()
     let (playHint, projectedScore) = handPreview()
     result = buildHtml(tdiv(class = "game-layout")):
       sidebarLeft()
       tdiv(class = "table-wrap"):
         tdiv(class = "table"):
-          if gMode == "round":
+          if gMode == ModeRound:
             tdiv(class = "table-blind"):
               span:
                 if effectForBlind(gRunState.progress) == FlushOrBetter:
@@ -251,7 +243,7 @@ when defined(js):
                       text "Discard (" & $gSelected.len & ")"
                   else:
                     span(class = "discard-hint"): text "Discard: select 1–8 cards above, then click Discard"
-          elif gMode == "shop":
+          elif gMode == ModeShop:
             tdiv(class = "table-shop"):
               tdiv(class = "shop-title"): text "Shop"
               tdiv(class = "shop-money"): text "$" & $gRunState.money
@@ -291,7 +283,7 @@ when defined(js):
                   button(class = "btn btn-secondary", onclick = onReroll): text "Reroll ($" & $rerollCost & ")"
                 button(class = "btn", onclick = startNewRound): text "Skip"
                 button(class = "btn", onclick = startNewRound): text "Next round"
-          elif gMode == "win":
+          elif gMode == ModeWin:
             tdiv(class = "end-screen"):
               h2: text "You won!"
               p: text "Run complete."
@@ -311,7 +303,7 @@ when defined(js):
       gRoundState.handLevels = gRunState.handLevels
       gMode = L.mode
       gSelected = @[]
-      if gMode == "shop":
+      if gMode == ModeShop:
         gShopState = generateOfferings()
     else:
       gRunState = initRunState()

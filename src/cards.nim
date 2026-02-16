@@ -21,7 +21,7 @@ type
     ## Draw pile; cards are taken from the end of the sequence (top of deck).
     cards*: seq[Card]
 
-proc newDeck*(): Deck =
+func newDeck*(): Deck =
   ## Build a standard 52-card deck (one of each suit/rank combination).
   result.cards = newSeq[Card](0)
   for s in Suit:
@@ -41,7 +41,7 @@ proc draw*(d: var Deck; n: int): seq[Card] =
   for i in 0 ..< take:
     result.add d.cards.pop
 
-proc `$`*(c: Card): string =
+func `$`*(c: Card): string =
   ## Display string for a card, e.g. "Ah", "10c".
   const rankStr: array[2..14, string] = ["2", "3", "4", "5", "6", "7", "8", "9", "10", "J", "Q", "K", "A"]
   const suitStr = ["s", "h", "d", "c"]

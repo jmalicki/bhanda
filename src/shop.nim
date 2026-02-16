@@ -1,6 +1,7 @@
 ## Shop: offered Jokers with prices, purchase and skip.
 
 import std/random
+import std/sugar
 import scoring
 
 type
@@ -45,10 +46,9 @@ const
 
 proc generateOfferings*(count: int = 4): ShopState =
   ## Return a random subset of the catalog (no duplicates). count is capped by catalog size.
-  var indices: seq[int]
-  for i in 0 ..< shopCatalog.len:
-    indices.add i
+  var indices = collect(newSeq):
+    for i in 0 ..< shopCatalog.len: i
   shuffle(indices)
   let n = min(count, indices.len)
-  for i in 0 ..< n:
-    result.items.add shopCatalog[indices[i]]
+  result.items = collect(newSeq):
+    for i in 0 ..< n: shopCatalog[indices[i]]

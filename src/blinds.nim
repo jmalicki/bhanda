@@ -10,7 +10,7 @@ type
     ante*: int
     roundInAnte*: int
 
-proc targetChipsForBlind*(ante: int; blind: BlindKind): int =
+func targetChipsForBlind*(ante: int; blind: BlindKind): int =
   ## Target chips to beat this blind. Scales up with ante.
   let base = case blind
   of SmallBlind: 300
@@ -18,7 +18,7 @@ proc targetChipsForBlind*(ante: int; blind: BlindKind): int =
   of BossBlind: 900
   result = base * ante
 
-proc currentBlind*(progress: RunProgress): BlindKind =
+func currentBlind*(progress: RunProgress): BlindKind =
   ## Which blind we're facing in this round.
   case progress.roundInAnte
   of 0: SmallBlind
@@ -26,7 +26,7 @@ proc currentBlind*(progress: RunProgress): BlindKind =
   of 2: BossBlind
   else: BossBlind
 
-proc blindDisplayName*(blind: BlindKind): string =
+func blindDisplayName*(blind: BlindKind): string =
   case blind
   of SmallBlind: "Small blind"
   of BigBlind: "Big blind"
@@ -37,7 +37,7 @@ type
     NoEffect
     FlushOrBetter
 
-proc effectForBlind*(progress: RunProgress): BlindEffect =
+func effectForBlind*(progress: RunProgress): BlindEffect =
   if progress.currentBlind() == BossBlind: FlushOrBetter else: NoEffect
 
 proc advanceRound*(progress: var RunProgress) =
@@ -47,10 +47,10 @@ proc advanceRound*(progress: var RunProgress) =
     progress.roundInAnte = 0
     progress.ante += 1
 
-proc hasWonRun*(progress: RunProgress): bool =
+func hasWonRun*(progress: RunProgress): bool =
   ## True after defeating the ante 8 boss (Showdown).
   progress.ante >= 9
 
-proc targetChips*(progress: RunProgress): int =
+func targetChips*(progress: RunProgress): int =
   ## Target chips for the current round.
   targetChipsForBlind(progress.ante, progress.currentBlind)

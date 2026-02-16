@@ -11,6 +11,10 @@ import shop
 export cards, poker, scoring, round, blinds, shop
 
 type
+  GameMode* = enum
+    ## Current phase of the run: playing a round, in shop, or end screen.
+    ModeRound, ModeShop, ModeWin, ModeLose
+
   RunState* = object
     ## Full run state: progress through blinds, money, deck, Jokers, and round limits.
     progress*: RunProgress
@@ -38,3 +42,19 @@ proc initRunState*(): RunState =
   result.boughtExtraHand = false
   result.boughtExtraDiscard = false
   result.boughtExtraJokerSlot = false
+
+func modeToStorageKey*(m: GameMode): string =
+  ## String used when persisting mode to localStorage (stable across versions).
+  case m
+  of ModeRound: "round"
+  of ModeShop: "shop"
+  of ModeWin: "win"
+  of ModeLose: "lose"
+
+func parseGameMode*(s: string): GameMode =
+  ## Parse stored mode string; defaults to ModeRound if unknown.
+  case s
+  of "shop": ModeShop
+  of "win": ModeWin
+  of "lose": ModeLose
+  else: ModeRound

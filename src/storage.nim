@@ -44,7 +44,7 @@ when defined(js):
     result.effect = JokerEffectKind(j["e"].getInt(0))
     result.value = j["v"].getInt(0)
 
-  proc saveState*(runState: RunState; roundState: RoundState; mode: string) =
+  proc saveState*(runState: RunState; roundState: RoundState; mode: GameMode) =
     ## Write run + round + mode to localStorage (Web Storage).
     var j = newJObject()
     j["progress"] = newJObject()
@@ -70,7 +70,7 @@ when defined(js):
     for c in roundState.hand:
       j["hand"].add cardToJson(c)
     j["targetChips"] = %roundState.targetChips
-    j["mode"] = %mode
+    j["mode"] = %modeToStorageKey(mode)
     let s = $j
     window.localStorage.setItem(storageKey, cstring(s))
 
@@ -78,7 +78,7 @@ when defined(js):
     LoadedState* = object
       runState*: RunState
       roundState*: RoundState
-      mode*: string
+      mode*: GameMode
 
   proc loadState*(): Option[LoadedState] =
     ## Read from localStorage; return none if missing or invalid.
@@ -115,7 +115,7 @@ when defined(js):
       roundSt.deck = run.deck
       roundSt.targetChips = j["targetChips"].getInt(300)
       roundSt.jokers = run.jokers
-      result = some(LoadedState(runState: run, roundState: roundSt, mode: j["mode"].getStr("round")))
+      result = some(LoadedState(runState: run, roundState: roundSt, mode: parseGameMode(j["mode"].getStr("round"))))
     except:
       result = none(LoadedState)
 
@@ -130,7 +130,7 @@ else:
   type LoadedState* = object
     runState*: RunState
     roundState*: RoundState
-    mode*: string
-  proc saveState*(runState: RunState; roundState: RoundState; mode: string) = discard
+    mode*: GameMode
+  proc saveState*(runState: RunState; roundState: RoundState; mode: GameMode) = discard
   proc loadState*(): Option[LoadedState] = none(LoadedState)
   proc clearState*() = discard
