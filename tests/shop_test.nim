@@ -33,3 +33,29 @@ suite "shop":
   test "cash for blind":
     check cashForBlind(0) >= 10
     check cashForBlind(2) > cashForBlind(0)
+
+  test "shopCatalog is non-empty":
+    check shopCatalog.len >= 1
+    for it in shopCatalog:
+      check it.price > 0
+      check it.joker.name.len > 0
+
+  test "generateOfferings returns default count of 4":
+    let shop = generateOfferings()
+    check shop.items.len == 4
+
+  test "generateOfferings count is capped at catalog size":
+    let shop = generateOfferings(100)
+    check shop.items.len == shopCatalog.len
+
+  test "generateOfferings items are from catalog":
+    let shop = generateOfferings()
+    for it in shop.items:
+      check it in shopCatalog
+
+  test "generateOfferings has no duplicate items":
+    let shop = generateOfferings()
+    var seen: seq[ShopItem]
+    for it in shop.items:
+      check it notin seen
+      seen.add it

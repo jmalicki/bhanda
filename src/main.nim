@@ -13,6 +13,7 @@ when defined(js):
 
   var gRunState: RunState
   var gRoundState: RoundState
+  var gShopState: ShopState
   var gSelected: seq[int]
   var gMode: string = "round"
 
@@ -32,6 +33,7 @@ when defined(js):
         gMode = "win"
       else:
         gMode = "shop"
+        gShopState = generateOfferings()
       saveCurrent()
     of HandConsumed:
       saveCurrent()
@@ -64,6 +66,15 @@ when defined(js):
   proc cardClick(i: int): proc() =
     result = proc() = toggleCard(i)
 
+  proc buyItem(i: int) =
+    if i < 0 or i >= gShopState.items.len: return
+    let joker = gShopState.items[i].joker
+    if purchase(gShopState, i, gRunState.money):
+      gRunState.jokers.add joker
+
+  proc buyClick(i: int): proc() =
+    result = proc() = buyItem(i)
+
   proc sidebar(): VNode =
     result = buildHtml(tdiv(class = "sidebar")):
       tdiv(class = "instructions"):
@@ -93,7 +104,15 @@ when defined(js):
               span: text "Hands left"
               span(class = "value"): text $gRoundState.handsLeft
             tdiv(class = "table-play-zone"):
-              span(class = "hint"): text "Select 5 cards below to play"
+              if gSelected.len == 5:
+                block:
+                  var selCards: seq[Card]
+                  for idx in gSelected: selCards.add gRoundState.hand[idx]
+                  let kind = detectPokerHand(selCards)
+                  let score = computeScore(kind, selCards, gRoundState.jokers)
+                  span(class = "hint"): text "Hand: " & handDisplayName(kind) & " — Score: " & $score
+              else:
+                span(class = "hint"): text "Select 5 cards below to play"
             tdiv(class = "hand-area"):
               tdiv(class = "label"): text "Your hand"
               tdiv(class = "hand-cards"):
@@ -113,9 +132,13 @@ when defined(js):
             tdiv(class = "table-shop"):
               tdiv(class = "shop-title"): text "Shop"
               tdiv(class = "shop-money"): text "$" & $gRunState.money
-              tdiv(class = "shop-items"): discard
+              tdiv(class = "shop-items"):
+                for i in 0 ..< gShopState.items.len:
+                  let it = gShopState.items[i]
+                  button(class = "btn", onclick = buyClick(i)):
+                    text it.joker.name & " ($" & $it.price & ")"
               tdiv(class = "table-actions"):
-                button(class = "btn"): text "Skip"
+                button(class = "btn", onclick = startNewRound): text "Skip"
                 button(class = "btn", onclick = startNewRound): text "Next round"
           elif gMode == "win":
             tdiv(class = "end-screen"):
@@ -135,6 +158,8 @@ when defined(js):
       gRoundState = L.roundState
       gMode = L.mode
       gSelected = @[]
+      if gMode == "shop":
+        gShopState = generateOfferings()
     else:
       gRunState = initRunState()
       startNewRound()

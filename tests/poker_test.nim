@@ -76,6 +76,13 @@ suite "detectPokerHand":
     let hand = @["Ah", "3d", "5c", "7s", "9h"].map(makeCard)
     check detectPokerHand(hand) == HighCard
 
+suite "handDisplayName":
+  test "two pair has display name":
+    check handDisplayName(TwoPair) == "Two pair"
+  test "all hand kinds have non-empty display names":
+    for k in PokerHandKind:
+      check handDisplayName(k).len > 0
+
 suite "baseChipsAndMult":
   test "pair base":
     let (chips, mult) = baseChipsAndMult(Pair)

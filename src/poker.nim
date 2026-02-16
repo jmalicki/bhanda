@@ -75,3 +75,16 @@ proc baseChipsAndMult*(kind: PokerHandKind): ChipsMult =
   of FullHouse:    (120, 4)
   of FourKind:     (160, 7)
   of StraightFlush:(200, 8)
+
+proc handDisplayName*(kind: PokerHandKind): string =
+  ## Human-readable name for UI (e.g. "Two pair").
+  case kind
+  of HighCard:     "High card"
+  of Pair:         "Pair"
+  of TwoPair:      "Two pair"
+  of ThreeKind:    "Three of a kind"
+  of Straight:     "Straight"
+  of Flush:        "Flush"
+  of FullHouse:    "Full house"
+  of FourKind:     "Four of a kind"
+  of StraightFlush: "Straight flush"
