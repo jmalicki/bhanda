@@ -1,6 +1,7 @@
 ## Round state machine: start round, play hand, refill, game over.
 ## Tracks hands left, discards left, current hand cards, and deck.
 
+import std/options
 import std/sets
 import cards
 import poker
@@ -15,13 +16,14 @@ type
     deck*: Deck
     targetChips*: int
     jokers*: seq[Joker]
+    minHandKind*: Option[PokerHandKind]
 
   PlayResult* = enum
     ## Outcome of playing a hand: win round, use a hand and continue, or game over.
     RoundWon, HandConsumed, GameOver
 
 proc startRound*(handsPerRound: int; discardsPerRound: int; targetChips: int;
-    deck: Deck; jokers: seq[Joker]; seed: int = 0): RoundState =
+    deck: Deck; jokers: seq[Joker]; minHandKind: Option[PokerHandKind] = none(PokerHandKind); seed: int = 0): RoundState =
   ## Initialize a new round: shuffle deck, draw initial hand (8 cards), set hands/discards.
   var d = deck
   d.shuffle(seed)
@@ -32,6 +34,7 @@ proc startRound*(handsPerRound: int; discardsPerRound: int; targetChips: int;
   result.deck = d
   result.targetChips = targetChips
   result.jokers = jokers
+  result.minHandKind = minHandKind
 
 proc playHand*(rs: var RoundState; selectedIndices: seq[int]): PlayResult =
   ## Play 5 selected cards (by index in rs.hand). If score >= targetChips, RoundWon.
@@ -44,7 +47,9 @@ proc playHand*(rs: var RoundState; selectedIndices: seq[int]): PlayResult =
     selected.add rs.hand[i]
   let kind = detectPokerHand(selected)
   let score = computeScore(kind, selected, rs.jokers)
-  if score >= rs.targetChips:
+  let meetsTarget = score >= rs.targetChips
+  let meetsMinHand = rs.minHandKind.isNone or kind >= rs.minHandKind.get
+  if meetsTarget and meetsMinHand:
     return RoundWon
   rs.handsLeft -= 1
   var newHand: seq[Card]

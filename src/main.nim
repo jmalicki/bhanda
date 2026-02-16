@@ -43,12 +43,14 @@ when defined(js):
 
   proc startNewRound() =
     gMode = "round"
+    let minHand = if effectForBlind(gRunState.progress) == FlushOrBetter: some(Flush) else: none(PokerHandKind)
     gRoundState = startRound(
       gRunState.handsPerRound,
       gRunState.discardsPerRound,
       gRunState.progress.targetChips,
       gRunState.deck,
-      gRunState.jokers)
+      gRunState.jokers,
+      minHand)
     gRunState.deck = gRoundState.deck
     gSelected = @[]
     saveCurrent()
@@ -132,7 +134,11 @@ when defined(js):
         tdiv(class = "table"):
           if gMode == "round":
             tdiv(class = "table-blind"):
-              span: text blindDisplayName(gRunState.progress.currentBlind())
+              span:
+                if effectForBlind(gRunState.progress) == FlushOrBetter:
+                  text blindDisplayName(gRunState.progress.currentBlind()) & ": Flush or better"
+                else:
+                  text blindDisplayName(gRunState.progress.currentBlind())
               span: text "Target"
               span(class = "value"): text $gRoundState.targetChips
               span: text "Score"
@@ -201,6 +207,7 @@ when defined(js):
       let L = loaded.get()
       gRunState = L.runState
       gRoundState = L.roundState
+      gRoundState.minHandKind = if effectForBlind(gRunState.progress) == FlushOrBetter: some(Flush) else: none(PokerHandKind)
       gMode = L.mode
       gSelected = @[]
       if gMode == "shop":

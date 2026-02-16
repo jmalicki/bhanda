@@ -32,6 +32,14 @@ proc blindDisplayName*(blind: BlindKind): string =
   of BigBlind: "Big blind"
   of BossBlind: "Boss"
 
+type
+  BlindEffect* = enum
+    NoEffect
+    FlushOrBetter
+
+proc effectForBlind*(progress: RunProgress): BlindEffect =
+  if progress.currentBlind() == BossBlind: FlushOrBetter else: NoEffect
+
 proc advanceRound*(progress: var RunProgress) =
   ## After winning a round: next round in ante, or next ante if we beat the boss.
   progress.roundInAnte += 1
