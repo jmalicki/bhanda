@@ -26,7 +26,10 @@ when defined(js):
         <li>Spend money in the shop on Jokers, then start the next round.</li>
       </ul>
     </div>
-    <button class="btn btn-secondary" data-new="1">Reset</button>"""
+    <div class="sidebar-reset">
+      <p class="sidebar-reset-label">Start over (clears saved progress)</p>
+      <button class="btn" data-new="1">New run</button>
+    </div>"""
 
   proc wrapTableWithLayout(tableContent: string): string =
     "<div class=\"game-layout\"><div class=\"table-wrap\"><div class=\"table\">" &
