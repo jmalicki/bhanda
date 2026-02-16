@@ -100,6 +100,13 @@ when defined(js):
   proc sellClick(i: int): proc() =
     result = proc() = onSell(i)
 
+  const rerollCost = 1
+  proc onReroll() =
+    if gRunState.money >= rerollCost:
+      gRunState.money -= rerollCost
+      gShopState = generateOfferings()
+      saveCurrent()
+
   proc sidebar(): VNode =
     result = buildHtml(tdiv(class = "sidebar")):
       tdiv(class = "instructions"):
@@ -211,6 +218,8 @@ when defined(js):
                     button(class = "btn", onclick = buyClick(i)):
                       text it.joker.name & " ($" & $it.price & ")"
               tdiv(class = "table-actions"):
+                if gRunState.money >= rerollCost:
+                  button(class = "btn btn-secondary", onclick = onReroll): text "Reroll ($" & $rerollCost & ")"
                 button(class = "btn", onclick = startNewRound): text "Skip"
                 button(class = "btn", onclick = startNewRound): text "Next round"
           elif gMode == "win":
