@@ -138,8 +138,8 @@ when defined(js):
       gRunState.maxJokerSlots += 1
       saveCurrent()
 
-  proc sidebar(): VNode =
-    result = buildHtml(tdiv(class = "sidebar")):
+  proc sidebarLeft(): VNode =
+    result = buildHtml(tdiv(class = "sidebar sidebar-left")):
       tdiv(class = "instructions"):
         h3: text "How to play"
         ul:
@@ -154,8 +154,28 @@ when defined(js):
             text "Hit "
             strong: text "Play hand"
             text " — if your score meets the target, you beat the blind and earn $."
-          li: text "Spend money in the shop on Jokers, then start the next round."
-          li: text "Jokers you buy are always active — they boost every hand's score automatically."
+          li:
+            text "Shop: "
+            strong: text "Jokers"
+            text " are score items you collect — they boost every hand; you have a limited number of slots and can sell them. "
+            strong: text "Vouchers"
+            text " are one-time upgrades that change the run's rules (more hands, discards, or joker slots); you don't hold them, they just modify the numbers in the status panel."
+
+  proc sidebarRight(): VNode =
+    result = buildHtml(tdiv(class = "sidebar sidebar-right")):
+      tdiv(class = "run-rules"):
+        h3: text "Run rules"
+        p(class = "run-rules-desc"): text "Limits for this run (vouchers can increase these):"
+        ul(class = "run-rules-list"):
+          li: text $gRunState.handsPerRound & " hands per round"
+          li: text $gRunState.discardsPerRound & " discards per round"
+          li: text $gRunState.maxJokerSlots & " Joker slots (how many Jokers you can hold)"
+        if gRunState.boughtExtraHand or gRunState.boughtExtraDiscard or gRunState.boughtExtraJokerSlot:
+          p(class = "run-rules-vouchers"): text "Active vouchers:"
+          ul(class = "run-rules-vouchers-list"):
+            if gRunState.boughtExtraHand: li: text "+1 Hand per round"
+            if gRunState.boughtExtraDiscard: li: text "+1 Discard per round"
+            if gRunState.boughtExtraJokerSlot: li: text "+1 Joker slot"
       tdiv(class = "your-jokers"):
         h3: text "Your Jokers (" & $gRunState.jokers.len & "/" & $gRunState.maxJokerSlots & ")"
         if gRunState.jokers.len == 0:
@@ -187,6 +207,7 @@ when defined(js):
       clearState()
     let (playHint, projectedScore) = handPreview()
     result = buildHtml(tdiv(class = "game-layout")):
+      sidebarLeft()
       tdiv(class = "table-wrap"):
         tdiv(class = "table"):
           if gMode == "round":
@@ -236,33 +257,35 @@ when defined(js):
               tdiv(class = "shop-money"): text "$" & $gRunState.money
               if gRunState.jokers.len >= gRunState.maxJokerSlots:
                 p(class = "shop-slots-full"): text "Joker slots full (" & $gRunState.maxJokerSlots & "/" & $gRunState.maxJokerSlots & "). Sell one to buy more."
+              tdiv(class = "shop-jokers-buy"):
+                p(class = "shop-section-label"): text "Jokers (score boosters you hold; limited by slots):"
+                tdiv(class = "shop-items"):
+                  for i in 0 ..< gShopState.items.len:
+                    let it = gShopState.items[i]
+                    if gRunState.jokers.len >= gRunState.maxJokerSlots:
+                      button(class = "btn btn-disabled", disabled = true):
+                        text it.joker.name & " ($" & $it.price & ")"
+                    else:
+                      button(class = "btn", onclick = buyClick(i)):
+                        text it.joker.name & " ($" & $it.price & ")"
               if gRunState.jokers.len > 0:
                 tdiv(class = "shop-sell"):
-                  p(class = "shop-sell-label"): text "Sell a Joker ($" & $sellPrice & " each):"
+                  p(class = "shop-section-label"): text "Sell a Joker ($" & $sellPrice & " each):"
                   for i in 0 ..< gRunState.jokers.len:
                     let j = gRunState.jokers[i]
                     button(class = "btn btn-secondary", onclick = sellClick(i)):
                       text j.name & " — Sell ($" & $sellPrice & ")"
               tdiv(class = "shop-vouchers"):
-                p(class = "shop-vouchers-label"): text "Vouchers (permanent):"
+                p(class = "shop-section-label"): text "Vouchers (one-time upgrades that change run rules above; you don't hold them):"
                 if not gRunState.boughtExtraHand:
                   button(class = "btn btn-voucher", onclick = onBuyVoucherHand):
-                    text "+1 Hand — $" & $voucherPrice
+                    text "+1 Hand per round — $" & $voucherPrice
                 if not gRunState.boughtExtraDiscard:
                   button(class = "btn btn-voucher", onclick = onBuyVoucherDiscard):
-                    text "+1 Discard — $" & $voucherPrice
+                    text "+1 Discard per round — $" & $voucherPrice
                 if not gRunState.boughtExtraJokerSlot:
                   button(class = "btn btn-voucher", onclick = onBuyVoucherJokerSlot):
-                    text "+1 Joker slot — $" & $voucherPrice
-              tdiv(class = "shop-items"):
-                for i in 0 ..< gShopState.items.len:
-                  let it = gShopState.items[i]
-                  if gRunState.jokers.len >= gRunState.maxJokerSlots:
-                    button(class = "btn btn-disabled", disabled = true):
-                      text it.joker.name & " ($" & $it.price & ")"
-                  else:
-                    button(class = "btn", onclick = buyClick(i)):
-                      text it.joker.name & " ($" & $it.price & ")"
+                    text "+1 Joker slot (hold more Jokers) — $" & $voucherPrice
               tdiv(class = "table-actions"):
                 if gRunState.money >= rerollCost:
                   button(class = "btn btn-secondary", onclick = onReroll): text "Reroll ($" & $rerollCost & ")"
@@ -276,7 +299,7 @@ when defined(js):
             tdiv(class = "end-screen"):
               h2: text "Game over"
               p: text "Better luck next time."
-      sidebar()
+      sidebarRight()
 
   proc run() =
     let loaded = loadState()
