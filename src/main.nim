@@ -92,6 +92,15 @@ when defined(js):
             strong: text "Play hand"
             text " — if your score meets the target, you beat the blind and earn $."
           li: text "Spend money in the shop on Jokers, then start the next round."
+          li: text "Jokers you buy are always active — they boost every hand's score automatically."
+      tdiv(class = "your-jokers"):
+        h3: text "Your Jokers"
+        if gRunState.jokers.len == 0:
+          p(class = "jokers-empty"): text "None yet. Beat a blind, then buy some in the shop."
+        else:
+          ul:
+            for j in gRunState.jokers:
+              li: text j.name
       tdiv(class = "sidebar-reset"):
         p(class = "sidebar-reset-label"): text "Start over (clears saved progress)"
         button(class = "btn", `data-new` = "1", onclick = doNewRun): text "New run"
