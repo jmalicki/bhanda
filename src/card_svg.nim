@@ -71,7 +71,8 @@ proc faceCardCenter*(card: Card): string =
 
 proc cardToSvg*(card: Card): string =
   ## Full SVG for one card: frame, corner indices, and center (pips or face).
-  result = "<svg width=\"" & $CardW & "\" height=\"" & $CardH & "\">"
+  ## pointer-events: none so clicks hit the parent div (data-index) for selection.
+  result = "<svg width=\"" & $CardW & "\" height=\"" & $CardH & "\" style=\"pointer-events:none\">"
   result &= cardFrameSvg()
   let rs = rankStr(card.rank)
   let ss = suitSymbol(card.suit)

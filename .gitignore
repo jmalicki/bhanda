@@ -1,11 +1,10 @@
 # Nim
 nimcache/
 *.exe
-# Root build output (do not commit; use docs/ for playable deployment)
+# Build output (CI builds and deploys docs/bhanda.js for GitHub Pages)
 bhanda.js
+docs/bhanda.js
 serve_docs
-# Allow the playable bundle in docs/ for GitHub Pages
-!docs/bhanda.js
 
 # IDE / OS
 .idea/
