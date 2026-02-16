@@ -91,7 +91,16 @@ when defined(js):
         p(class = "sidebar-reset-label"): text "Start over (clears saved progress)"
         button(class = "btn", `data-new` = "1", onclick = doNewRun): text "New run"
 
+  proc handPreviewText(): string =
+    if gSelected.len != 5: return ""
+    var selCards: seq[Card]
+    for idx in gSelected: selCards.add gRoundState.hand[idx]
+    let kind = detectPokerHand(selCards)
+    let score = computeScore(kind, selCards, gRoundState.jokers)
+    "Hand: " & handDisplayName(kind) & " — Score: " & $score
+
   proc createDom(): VNode =
+    let playHint = handPreviewText()
     result = buildHtml(tdiv(class = "game-layout")):
       tdiv(class = "table-wrap"):
         tdiv(class = "table"):
@@ -104,13 +113,8 @@ when defined(js):
               span: text "Hands left"
               span(class = "value"): text $gRoundState.handsLeft
             tdiv(class = "table-play-zone"):
-              if gSelected.len == 5:
-                block:
-                  var selCards: seq[Card]
-                  for idx in gSelected: selCards.add gRoundState.hand[idx]
-                  let kind = detectPokerHand(selCards)
-                  let score = computeScore(kind, selCards, gRoundState.jokers)
-                  span(class = "hint"): text "Hand: " & handDisplayName(kind) & " — Score: " & $score
+              if playHint.len > 0:
+                span(class = "hint"): text playHint
               else:
                 span(class = "hint"): text "Select 5 cards below to play"
             tdiv(class = "hand-area"):
