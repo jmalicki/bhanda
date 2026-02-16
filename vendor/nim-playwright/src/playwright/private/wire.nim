@@ -69,6 +69,7 @@ proc send*(d: Driver; guid: string; methodName: string; params: JsonNode): int =
   result = id
   let frame = encodeFrame(s)
   d.stdinStream.write(frame)
+  d.stdinStream.flush()
 
 proc readMessage(d: Driver): JsonNode =
   let s = d.stdoutStream

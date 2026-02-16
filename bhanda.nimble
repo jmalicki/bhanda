@@ -26,9 +26,10 @@ task test, "Run all tests (C backend)":
   exec "mkdir -p build"
   exec "nim c -o:build/run_tests -r tests/run_tests.nim"
 
-task testE2e, "E2E test with Playwright (builds JS, serves docs/ via nimhttpd, runs browser test; needs Node + npx)":
+task testE2e, "E2E test with Playwright (builds JS, serves docs/ via nimhttpd, runs browser test; needs Node)":
   exec "nimble buildjs"
   exec "cp build/bhanda.js docs/bhanda.js"
+  exec "npm install"
   exec "npx -y playwright install chromium"
   exec "bash tests/run_e2e.sh"
 

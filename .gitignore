@@ -16,7 +16,12 @@ serve_docs
 .DS_Store
 Thumbs.db
 
+# Node (Playwright for E2E)
+node_modules/
+package-lock.json
+
 # Build artifacts
 htmldocs/
 tests/run_tests
 tests/e2e_bhanda
+tests/e2e_runner

@@ -1,0 +1,8 @@
+{
+  "name": "bhanda-e2e",
+  "private": true,
+  "description": "Playwright driver for Bhanda E2E tests",
+  "devDependencies": {
+    "playwright": "1.49"
+  }
+}

@@ -61,10 +61,11 @@ proc initPlaywright*(): Playwright =
   let driver = startDriver()
   # Root has guid ""; call initialize to get Playwright object.
   var params = newJObject()
-  params["sdkLanguage"] = %"nim"
+  params["sdkLanguage"] = %"javascript"
   let res = driver.call("", "initialize", params)
   let pw = res.getOrDefault("playwright")
-  result = Playwright(driver: driver, guid: pw.getStr("guid"))
+  let guid = if pw != nil and pw.kind == JString: pw.getStr() else: pw.getStr("guid")
+  result = Playwright(driver: driver, guid: guid)
 
 proc close*(p: Playwright) =
   if p.driver != nil:
