@@ -85,6 +85,16 @@ when defined(js):
       gRunState.deck = gRoundState.deck
       saveCurrent()
 
+  const sellPrice = 2
+  proc onSell(jokerIndex: int) =
+    if jokerIndex < 0 or jokerIndex >= gRunState.jokers.len: return
+    gRunState.jokers.delete(jokerIndex)
+    gRunState.money += sellPrice
+    saveCurrent()
+
+  proc sellClick(i: int): proc() =
+    result = proc() = onSell(i)
+
   proc sidebar(): VNode =
     result = buildHtml(tdiv(class = "sidebar")):
       tdiv(class = "instructions"):
@@ -179,6 +189,13 @@ when defined(js):
               tdiv(class = "shop-money"): text "$" & $gRunState.money
               if gRunState.jokers.len >= gRunState.maxJokerSlots:
                 p(class = "shop-slots-full"): text "Joker slots full (" & $gRunState.maxJokerSlots & "/" & $gRunState.maxJokerSlots & "). Sell one to buy more."
+              if gRunState.jokers.len > 0:
+                tdiv(class = "shop-sell"):
+                  p(class = "shop-sell-label"): text "Sell a Joker ($" & $sellPrice & " each):"
+                  for i in 0 ..< gRunState.jokers.len:
+                    let j = gRunState.jokers[i]
+                    button(class = "btn btn-secondary", onclick = sellClick(i)):
+                      text j.name & " — Sell ($" & $sellPrice & ")"
               tdiv(class = "shop-items"):
                 for i in 0 ..< gShopState.items.len:
                   let it = gShopState.items[i]
