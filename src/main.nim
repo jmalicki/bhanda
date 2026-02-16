@@ -105,6 +105,7 @@ when defined(js):
         if gRunState.jokers.len == 0:
           p(class = "jokers-empty"): text "None yet. Beat a blind, then buy some in the shop."
         else:
+          p(class = "jokers-how"): text "Applied automatically to every hand — no button to use."
           ul:
             for j in gRunState.jokers:
               li: text j.name
