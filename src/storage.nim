@@ -54,6 +54,7 @@ when defined(js):
     j["jokers"] = newJArray()
     for joker in runState.jokers:
       j["jokers"].add jokerToJson(joker)
+    j["maxJokerSlots"] = %runState.maxJokerSlots
     j["handsPerRound"] = %runState.handsPerRound
     j["discardsPerRound"] = %runState.discardsPerRound
     j["handsLeft"] = %roundState.handsLeft
@@ -87,6 +88,7 @@ when defined(js):
       run.jokers = @[]
       for item in j["jokers"]:
         run.jokers.add jokerFromJson(item)
+      run.maxJokerSlots = j["maxJokerSlots"].getInt(5)
       run.handsPerRound = j["handsPerRound"].getInt(4)
       run.discardsPerRound = j["discardsPerRound"].getInt(2)
       var roundSt: RoundState

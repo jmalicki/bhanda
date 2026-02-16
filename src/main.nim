@@ -68,6 +68,7 @@ when defined(js):
 
   proc buyItem(i: int) =
     if i < 0 or i >= gShopState.items.len: return
+    if gRunState.jokers.len >= gRunState.maxJokerSlots: return
     let joker = gShopState.items[i].joker
     if purchase(gShopState, i, gRunState.money):
       gRunState.jokers.add joker
@@ -101,7 +102,7 @@ when defined(js):
           li: text "Spend money in the shop on Jokers, then start the next round."
           li: text "Jokers you buy are always active — they boost every hand's score automatically."
       tdiv(class = "your-jokers"):
-        h3: text "Your Jokers"
+        h3: text "Your Jokers (" & $gRunState.jokers.len & "/" & $gRunState.maxJokerSlots & ")"
         if gRunState.jokers.len == 0:
           p(class = "jokers-empty"): text "None yet. Beat a blind, then buy some in the shop."
         else:
@@ -170,11 +171,17 @@ when defined(js):
             tdiv(class = "table-shop"):
               tdiv(class = "shop-title"): text "Shop"
               tdiv(class = "shop-money"): text "$" & $gRunState.money
+              if gRunState.jokers.len >= gRunState.maxJokerSlots:
+                p(class = "shop-slots-full"): text "Joker slots full (" & $gRunState.maxJokerSlots & "/" & $gRunState.maxJokerSlots & "). Sell one to buy more."
               tdiv(class = "shop-items"):
                 for i in 0 ..< gShopState.items.len:
                   let it = gShopState.items[i]
-                  button(class = "btn", onclick = buyClick(i)):
-                    text it.joker.name & " ($" & $it.price & ")"
+                  if gRunState.jokers.len >= gRunState.maxJokerSlots:
+                    button(class = "btn btn-disabled", disabled = true):
+                      text it.joker.name & " ($" & $it.price & ")"
+                  else:
+                    button(class = "btn", onclick = buyClick(i)):
+                      text it.joker.name & " ($" & $it.price & ")"
               tdiv(class = "table-actions"):
                 button(class = "btn", onclick = startNewRound): text "Skip"
                 button(class = "btn", onclick = startNewRound): text "Next round"
