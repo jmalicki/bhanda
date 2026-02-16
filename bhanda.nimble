@@ -7,8 +7,8 @@ license       = "MIT"
 srcDir        = "src"
 binDir        = "."
 
-# Dependencies (none required for JS build)
-# testE2e task: nimhttpd (static server); nim-playwright in vendor/ (Frame/click API)
+# Dependencies: karax for browser UI; nimhttpd for E2E
+requires "karax"
 requires "nimhttpd >= 1.0.0"
 
 # Tasks (all compilation output goes into build/, which is gitignored)
@@ -44,7 +44,6 @@ task lint, "Run compiler check on source and tests":
   exec "nim check -o:build/game src/game.nim"
   exec "nim check -o:build/card_svg src/card_svg.nim"
   exec "nim check -o:build/storage src/storage.nim"
-  exec "nim check -o:build/ui src/ui.nim"
   exec "nim check -o:build/main src/main.nim"
   exec "nim check -o:build/run_tests tests/run_tests.nim"
 
