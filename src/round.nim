@@ -56,3 +56,19 @@ proc playHand*(rs: var RoundState; selectedIndices: seq[int]): PlayResult =
   rs.hand = newHand
   if rs.handsLeft <= 0 or rs.hand.len < 5: return GameOver
   HandConsumed
+
+proc discardCards*(rs: var RoundState; indices: seq[int]): bool =
+  ## Discard the selected cards and draw that many from the deck. Uses one discard. Returns false if invalid.
+  if rs.discardsLeft <= 0: return false
+  if indices.len <= 0 or indices.len > rs.hand.len: return false
+  var chosen = toHashSet(indices)
+  for i in indices:
+    if i < 0 or i >= rs.hand.len: return false
+  var newHand: seq[Card]
+  for i in 0 ..< rs.hand.len:
+    if i notin chosen: newHand.add rs.hand[i]
+  let drawn = rs.deck.draw(indices.len)
+  for c in drawn: newHand.add c
+  rs.hand = newHand
+  rs.discardsLeft -= 1
+  true

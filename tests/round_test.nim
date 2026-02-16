@@ -36,3 +36,19 @@ suite "playHand":
     var rs = startRound(4, 2, 1, deck, @[], 111)
     let result = rs.playHand(@[0, 1, 2, 3, 4])
     check result == RoundWon
+
+suite "discardCards":
+  test "discard removes selected cards and draws same number":
+    var deck = newDeck()
+    var rs = startRound(4, 2, 300, deck, @[], 42)
+    check rs.discardsLeft == 2
+    check rs.hand.len == 8
+    let ok = rs.discardCards(@[0, 1, 2])
+    check ok == true
+    check rs.hand.len == 8
+    check rs.discardsLeft == 1
+
+  test "discard fails when no discards left":
+    var deck = newDeck()
+    var rs = startRound(4, 0, 300, deck, @[], 42)
+    check rs.discardCards(@[0]) == false

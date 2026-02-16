@@ -61,7 +61,7 @@ when defined(js):
   proc toggleCard(i: int) =
     let pos = gSelected.find(i)
     if pos >= 0: gSelected.del(pos)
-    elif gSelected.len < 5: gSelected.add(i)
+    elif gSelected.len < 8: gSelected.add(i)
 
   proc cardClick(i: int): proc() =
     result = proc() = toggleCard(i)
@@ -75,12 +75,19 @@ when defined(js):
   proc buyClick(i: int): proc() =
     result = proc() = buyItem(i)
 
+  proc onDiscard() =
+    if gRoundState.discardsLeft <= 0 or gSelected.len == 0: return
+    if discardCards(gRoundState, gSelected):
+      gSelected = @[]
+      gRunState.deck = gRoundState.deck
+      saveCurrent()
+
   proc sidebar(): VNode =
     result = buildHtml(tdiv(class = "sidebar")):
       tdiv(class = "instructions"):
         h3: text "How to play"
         ul:
-          li: text "Click 5 cards to select your hand."
+          li: text "Select 5 cards to play a hand, or select 1–8 cards and use Discard to draw new ones (limited per round)."
           li:
             text "The "
             strong: text "Score"
@@ -126,6 +133,8 @@ when defined(js):
               span(class = "value"): text $projectedScore
               span: text "Hands left"
               span(class = "value"): text $gRoundState.handsLeft
+              span: text "Discards left"
+              span(class = "value"): text $gRoundState.discardsLeft
             tdiv(class = "table-play-zone"):
               if playHint.len > 0:
                 span(class = "hint"): text playHint
@@ -146,6 +155,9 @@ when defined(js):
               tdiv(class = "table-actions"):
                 if gSelected.len == 5:
                   button(class = "btn", `data-play` = "1", onclick = onPlayHand): text "Play hand"
+                if gRoundState.discardsLeft > 0 and gSelected.len >= 1:
+                  button(class = "btn btn-secondary", onclick = onDiscard):
+                    text "Discard (" & $gSelected.len & ")"
           elif gMode == "shop":
             tdiv(class = "table-shop"):
               tdiv(class = "shop-title"): text "Shop"
