@@ -122,6 +122,9 @@ when defined(js):
     ("Hand: " & handDisplayName(kind) & " — Score: " & $score, score)
 
   proc createDom(): VNode =
+    if gMode == "round" and gRoundState.hand.len < 5:
+      gMode = "lose"
+      clearState()
     let (playHint, projectedScore) = handPreview()
     result = buildHtml(tdiv(class = "game-layout")):
       tdiv(class = "table-wrap"):
