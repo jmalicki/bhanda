@@ -46,6 +46,8 @@ when defined(js):
       clearState()
 
   proc startNewRound() =
+    if gMode == "shop":
+      gRunState.money += (gRunState.money * 5) div 100
     gMode = "round"
     let minHand = if effectForBlind(gRunState.progress) == FlushOrBetter: some(Flush) else: none(PokerHandKind)
     gRoundState = startRound(
