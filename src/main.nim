@@ -155,9 +155,12 @@ when defined(js):
               tdiv(class = "table-actions"):
                 if gSelected.len == 5:
                   button(class = "btn", `data-play` = "1", onclick = onPlayHand): text "Play hand"
-                if gRoundState.discardsLeft > 0 and gSelected.len >= 1:
-                  button(class = "btn btn-secondary", onclick = onDiscard):
-                    text "Discard (" & $gSelected.len & ")"
+                if gRoundState.discardsLeft > 0:
+                  if gSelected.len >= 1:
+                    button(class = "btn btn-secondary", onclick = onDiscard):
+                      text "Discard (" & $gSelected.len & ")"
+                  else:
+                    span(class = "discard-hint"): text "Discard: select 1–8 cards above, then click Discard"
           elif gMode == "shop":
             tdiv(class = "table-shop"):
               tdiv(class = "shop-title"): text "Shop"
