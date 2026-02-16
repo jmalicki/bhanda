@@ -22,10 +22,14 @@ when defined(js):
 
   proc onPlayHand() =
     if gSelected.len != 5: return
+    var selCards: seq[Card]
+    for idx in gSelected: selCards.add gRoundState.hand[idx]
+    let kind = detectPokerHand(selCards)
     let res = gRoundState.playHand(gSelected)
     gSelected = @[]
     case res
     of RoundWon:
+      gRunState.handLevels[kind] += 1
       let blindIdx = gRunState.progress.roundInAnte
       gRunState.progress.advanceRound()
       gRunState.money += cashForBlind(blindIdx)
@@ -50,7 +54,8 @@ when defined(js):
       gRunState.progress.targetChips,
       gRunState.deck,
       gRunState.jokers,
-      minHand)
+      minHand,
+      gRunState.handLevels)
     gRunState.deck = gRoundState.deck
     gSelected = @[]
     saveCurrent()
@@ -131,7 +136,7 @@ when defined(js):
     var selCards: seq[Card]
     for idx in gSelected: selCards.add gRoundState.hand[idx]
     let kind = detectPokerHand(selCards)
-    let score = computeScore(kind, selCards, gRoundState.jokers)
+    let score = computeScore(kind, selCards, gRoundState.jokers, gRoundState.handLevels)
     ("Hand: " & handDisplayName(kind) & " — Score: " & $score, score)
 
   proc createDom(): VNode =
@@ -225,6 +230,7 @@ when defined(js):
       gRunState = L.runState
       gRoundState = L.roundState
       gRoundState.minHandKind = if effectForBlind(gRunState.progress) == FlushOrBetter: some(Flush) else: none(PokerHandKind)
+      gRoundState.handLevels = gRunState.handLevels
       gMode = L.mode
       gSelected = @[]
       if gMode == "shop":

@@ -17,13 +17,15 @@ type
     targetChips*: int
     jokers*: seq[Joker]
     minHandKind*: Option[PokerHandKind]
+    handLevels*: array[PokerHandKind, int]
 
   PlayResult* = enum
     ## Outcome of playing a hand: win round, use a hand and continue, or game over.
     RoundWon, HandConsumed, GameOver
 
 proc startRound*(handsPerRound: int; discardsPerRound: int; targetChips: int;
-    deck: Deck; jokers: seq[Joker]; minHandKind: Option[PokerHandKind] = none(PokerHandKind); seed: int = 0): RoundState =
+    deck: Deck; jokers: seq[Joker]; minHandKind: Option[PokerHandKind] = none(PokerHandKind);
+    handLevels: array[PokerHandKind, int] = default(array[PokerHandKind, int]); seed: int = 0): RoundState =
   ## Initialize a new round: shuffle deck, draw initial hand (8 cards), set hands/discards.
   var d = deck
   d.shuffle(seed)
@@ -35,6 +37,7 @@ proc startRound*(handsPerRound: int; discardsPerRound: int; targetChips: int;
   result.targetChips = targetChips
   result.jokers = jokers
   result.minHandKind = minHandKind
+  result.handLevels = handLevels
 
 proc playHand*(rs: var RoundState; selectedIndices: seq[int]): PlayResult =
   ## Play 5 selected cards (by index in rs.hand). If score >= targetChips, RoundWon.
@@ -46,7 +49,7 @@ proc playHand*(rs: var RoundState; selectedIndices: seq[int]): PlayResult =
     if i < 0 or i >= rs.hand.len: return GameOver
     selected.add rs.hand[i]
   let kind = detectPokerHand(selected)
-  let score = computeScore(kind, selected, rs.jokers)
+  let score = computeScore(kind, selected, rs.jokers, rs.handLevels)
   let meetsTarget = score >= rs.targetChips
   let meetsMinHand = rs.minHandKind.isNone or kind >= rs.minHandKind.get
   if meetsTarget and meetsMinHand:

@@ -7,6 +7,7 @@ when defined(js):
   import std/options
   import cards
   import game
+  import poker
   import round
   import scoring
 
@@ -55,6 +56,9 @@ when defined(js):
     for joker in runState.jokers:
       j["jokers"].add jokerToJson(joker)
     j["maxJokerSlots"] = %runState.maxJokerSlots
+    j["handLevels"] = newJArray()
+    for k in PokerHandKind:
+      j["handLevels"].add %runState.handLevels[k]
     j["handsPerRound"] = %runState.handsPerRound
     j["discardsPerRound"] = %runState.discardsPerRound
     j["handsLeft"] = %roundState.handsLeft
@@ -89,6 +93,11 @@ when defined(js):
       for item in j["jokers"]:
         run.jokers.add jokerFromJson(item)
       run.maxJokerSlots = j["maxJokerSlots"].getInt(5)
+      if j.hasKey("handLevels") and j["handLevels"].len == high(PokerHandKind).ord + 1:
+        for i in 0..high(PokerHandKind).ord:
+          run.handLevels[PokerHandKind(i)] = j["handLevels"][i].getInt(1)
+      else:
+        for k in PokerHandKind: run.handLevels[k] = 1
       run.handsPerRound = j["handsPerRound"].getInt(4)
       run.discardsPerRound = j["discardsPerRound"].getInt(2)
       var roundSt: RoundState

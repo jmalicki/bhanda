@@ -15,10 +15,12 @@ type
     effect*: JokerEffectKind
     value*: int
 
-proc computeScore*(handKind: PokerHandKind; cards: seq[Card]; jokers: seq[Joker]): int =
-  ## Balatro-style score: Chips = base chips + level (sum of card rank values) + Joker chip bonuses;
+proc computeScore*(handKind: PokerHandKind; cards: seq[Card]; jokers: seq[Joker]; handLevels: array[PokerHandKind, int]): int =
+  ## Balatro-style score: Chips = base chips + hand-level bonus + level (sum of card rank values) + Joker chip bonuses;
   ## Mult = base mult, then + Joker add mult, then × Joker mult; final = Chips × Mult.
   var (chips, mult) = baseChipsAndMult(handKind)
+  let lvl = max(1, handLevels[handKind])
+  if lvl > 1: chips += (lvl - 1) * 5
   for c in cards:
     chips += rankValue(c.rank)
   for j in jokers:

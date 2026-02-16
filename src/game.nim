@@ -18,6 +18,7 @@ type
     deck*: Deck
     jokers*: seq[Joker]
     maxJokerSlots*: int
+    handLevels*: array[PokerHandKind, int]
     handsPerRound*: int
     discardsPerRound*: int
 
@@ -28,5 +29,6 @@ proc initRunState*(): RunState =
   result.deck = newDeck()
   result.jokers = @[]
   result.maxJokerSlots = 5
+  for k in PokerHandKind: result.handLevels[k] = 1
   result.handsPerRound = 4
   result.discardsPerRound = 2
