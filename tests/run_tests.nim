@@ -9,3 +9,4 @@ import round_test
 import blinds_test
 import shop_test
 import card_svg_test
+import property_test

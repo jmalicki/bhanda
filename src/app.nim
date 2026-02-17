@@ -135,7 +135,11 @@ when defined(js):
       for idx in gSelected: gRoundState.hand[idx]
     let kind = detectPokerHand(selCards)
     let score = computeScore(kind, selCards, gRoundState.jokers, gRoundState.handLevels)
-    ("Hand: " & handDisplayName(kind) & " — Score: " & $score, score)
+    var hint = "Hand: " & handDisplayName(kind) & " — Score: " & $score
+    let minHand = if effectForBlind(gRunState.progress) == FlushOrBetter: some(Flush) else: none(PokerHandKind)
+    if minHand.isSome and kind < minHand.get():
+      hint &= " — Flush or better required; this hand won't win the round."
+    (hint, score)
 
   proc checkLoseCondition*() =
     if gMode == ModeRound and gRoundState.hand.len < 5:
