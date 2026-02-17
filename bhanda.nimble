@@ -7,9 +7,8 @@ license       = "MIT"
 srcDir        = "src"
 binDir        = "."
 
-# Dependencies: karax for browser UI; nimhttpd for E2E; nim-playwright from Git for E2E
+# Dependencies: karax for browser UI; nim-playwright for E2E (includes serve/serve_wait)
 requires "karax"
-requires "nimhttpd >= 1.0.0"
 requires "https://github.com/jmalicki/nim-playwright#head"
 
 # Tasks (all compilation output goes into build/, which is gitignored)
@@ -27,7 +26,7 @@ task test, "Run all tests (C backend)":
   exec "mkdir -p build"
   exec "nim c -o:build/run_tests -r tests/run_tests.nim"
 
-task testE2e, "E2E test with Playwright (builds JS, serves docs/ via nimhttpd, runs browser test; needs Node)":
+task testE2e, "E2E test with Playwright (builds JS, serves docs/ via nim-playwright serve, runs browser test; needs Node)":
   exec "nimble buildjs"
   exec "cp build/bhanda.js docs/bhanda.js"
   exec "npm install"

@@ -1,4 +1,0 @@
-/* Used at compile time by nimhttpd when e2e_server imports it. Minimal so directory listing/error pages render. */
-body { font-family: system-ui, sans-serif; margin: 1rem; }
-ul { list-style: none; padding: 0; }
-a { color: #06c; }

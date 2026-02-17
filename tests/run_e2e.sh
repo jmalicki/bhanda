@@ -1,6 +1,5 @@
 #!/usr/bin/env bash
-# Build E2E binaries (server wrapper, launcher, runner, test), then run launcher
-# (blocks until server ready or failed), then runner (runs test, kills server).
+# Build E2E binaries, run server launcher (blocks until ready), then runner (runs test, kills server).
 # Timeout 120s. Use local Playwright (npm install) so driver starts without npx delay.
 set -e
 cd "$(dirname "$0")/.."
@@ -11,23 +10,31 @@ if [ -f node_modules/playwright/package.json ]; then
 fi
 
 mkdir -p build
-# nimhttpd compiles with "style.css".slurp relative to its package dir; ensure it exists
-NIMHTTPD_DIR="$(nimble path nimhttpd)"
-[ -f style.css ] && cp style.css "$NIMHTTPD_DIR/"
-nim c -o:build/e2e_server tests/e2e_server.nim
-nim c -o:build/e2e_serve tests/e2e_serve.nim
-nim c -o:build/e2e_runner tests/e2e_runner.nim
 
-# Prefer vendored nim-playwright (submodule) so we can debug; else use nimble path
+# Prefer vendored nim-playwright (submodule); else use nimble path
 if [ -d vendor/nim-playwright/src ]; then
   PLAYWRIGHT_SRC="$(cd "$(dirname "$0")/.." && pwd)/vendor/nim-playwright/src"
+  PLAYWRIGHT_ROOT="$(cd "$(dirname "$0")/.." && pwd)/vendor/nim-playwright"
+  # Build nim-playwright's serve and serve_wait into our build dir
+  (cd "$PLAYWRIGHT_ROOT" && nimble buildServe 2>/dev/null) || true
+  (cd "$PLAYWRIGHT_ROOT" && nimble buildServeWait 2>/dev/null) || true
+  SERVE_BIN="$PLAYWRIGHT_ROOT/tools/nimplaywright-serve"
+  SERVE_WAIT_BIN="$PLAYWRIGHT_ROOT/tools/nimplaywright-serve-wait"
 else
-  PLAYWRIGHT_SRC="$(nimble path nim_playwright)/src"
+  PLAYWRIGHT_ROOT="$(nimble path nim_playwright)"
+  PLAYWRIGHT_SRC="$PLAYWRIGHT_ROOT/src"
+  (cd "$PLAYWRIGHT_ROOT" && nimble buildServe 2>/dev/null) || true
+  (cd "$PLAYWRIGHT_ROOT" && nimble buildServeWait 2>/dev/null) || true
+  SERVE_BIN="$PLAYWRIGHT_ROOT/tools/nimplaywright-serve"
+  SERVE_WAIT_BIN="$PLAYWRIGHT_ROOT/tools/nimplaywright-serve-wait"
 fi
+
+nim c -o:build/e2e_runner tests/e2e_runner.nim
 nim c -o:build/e2e_bhanda -p:"$PLAYWRIGHT_SRC" tests/e2e_bhanda.nim
 
 # Launcher does not return until server is ready or failed; outputs "PORT PID"
-./build/e2e_serve > build/e2e_serve.out
+export PLAYWRIGHT_SERVE_BIN="$SERVE_BIN"
+"$SERVE_WAIT_BIN" docs > build/e2e_serve.out
 read -r E2E_PORT E2E_PID < build/e2e_serve.out
 export BHANDA_E2E_URL="http://127.0.0.1:${E2E_PORT}/"
 export SERVER_PID="$E2E_PID"
