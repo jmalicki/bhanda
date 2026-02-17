@@ -3,28 +3,45 @@
 ## Requires: Node.js, Playwright (nimble testE2e installs Chromium).
 ## BHANDA_E2E_URL is set by e2e_runner.
 ##
+## Debugging
+## - Vendored nim-playwright: use git submodule (vendor/nim-playwright). run_e2e.sh prefers it when present
+##   so you can edit vendor/nim-playwright/src and re-run to debug the binding.
+## - Headed browser: BHANDA_E2E_HEADED=1 runs Chromium visible (default headless).
+## - Slow steps: BHANDA_E2E_SLOW=500 (ms) sets LaunchOptions(slowMo).
+## - Driver wire debug: run driver manually and point at it, e.g. in nim-playwright repo:
+##   node node_modules/playwright/cli.js run-driver
+##   then PLAYWRIGHT_NIM_DRIVER="nc -U /tmp/pw.sock" (or similar) if you wrap the socket.
+##
 ## Troubleshooting
 ## - Driver must receive flushed stdin (vendor wire.nim: flush after send).
 ## - Playwright 1.49+ only accepts sdkLanguage: javascript|python|java|csharp (vendor api.nim uses "javascript").
 ## - Initialize result may return playwright as string (guid) or object with guid; vendor api.nim handles both.
 ## - If you see "Driver closed or read failed" after "init driver...", the driver is exiting after the first
-##   response; run the vendor E2E with the same driver to compare: e.g.
-##   PLAYWRIGHT_NIM_DRIVER="node node_modules/playwright/cli.js run-driver" nim c -p:vendor/nim-playwright/src -r vendor/nim-playwright/tests/test_e2e.nim
+##   response; run the vendor E2E with the same driver to compare.
 ## - Local driver (npm install + PLAYWRIGHT_NIM_DRIVER in run_e2e.sh) avoids npx resolve delay.
 
-import std/os
+import std/[os, strutils]
 import playwright
 
 const defaultUrl = "http://127.0.0.1:8765/"
 
 const viewport = (width: 1280, height: 720)
 
+proc launchOpts(): LaunchOptions =
+  let headless = getEnv("BHANDA_E2E_HEADED", "").len == 0
+  var slowMo = 0
+  try:
+    slowMo = parseInt(getEnv("BHANDA_E2E_SLOW", "0"))
+  except ValueError:
+    discard
+  LaunchOptions(headless: headless, slowMo: slowMo)
+
 proc runE2eSelectAndPlay(): bool =
   let gameUrl = getEnv("BHANDA_E2E_URL", defaultUrl)
   var p = initPlaywright()
   try:
     stdout.write "launch... "; flushFile(stdout)
-    let browser = p.chromium.launch(LaunchOptions(headless: true))
+    let browser = p.chromium.launch(launchOpts())
     try:
       let page = browser.newPage(NewPageOptions(viewport: viewport))
       try:
@@ -52,7 +69,7 @@ proc runE2eNewRun(): bool =
   var p = initPlaywright()
   try:
     stdout.write "launch... "; flushFile(stdout)
-    let browser = p.chromium.launch(LaunchOptions(headless: true))
+    let browser = p.chromium.launch(launchOpts())
     try:
       let page = browser.newPage(NewPageOptions(viewport: viewport))
       try:

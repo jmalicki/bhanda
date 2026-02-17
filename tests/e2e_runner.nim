@@ -1,8 +1,9 @@
-## E2E runner: find a free port, start HTTP server (nimhttpd), run E2E test binary.
-## Keeps port and server logic in Nim; no platform-specific shell.
-## Run after building docs/ and the e2e_bhanda binary; nimble testE2e does that.
+## E2E runner: run E2E test binary. If BHANDA_E2E_URL and SERVER_PID are set (by
+## e2e_serve launcher), skip starting the server and kill SERVER_PID when done.
+## Otherwise start nimhttpd and run the test (legacy path).
+## Run after building docs/ and e2e_bhanda; nimble testE2e does that.
 
-import std/[net, os, osproc]
+import std/[net, os, osproc, strutils]
 
 const
   docsDir = "docs"
@@ -32,6 +33,25 @@ proc waitForServer(port: Port; maxAttempts: int = 10): bool =
   return false
 
 proc main(): int =
+  let url = getEnv("BHANDA_E2E_URL")
+  let serverPidStr = getEnv("SERVER_PID")
+
+  if url.len > 0 and serverPidStr.len > 0:
+    echo "E2E: server already running at ", url, " (PID ", serverPidStr, ")"
+    let testProc = startProcess(
+      e2eBinary,
+      options = {poUsePath, poParentStreams}
+    )
+    result = testProc.waitForExit()
+    try:
+      let pid = serverPidStr.parseInt
+      if pid > 0:
+        let killProc = startProcess("kill", args = [$pid], options = {poUsePath})
+        discard killProc.waitForExit()
+    except ValueError:
+      discard
+    return
+
   let port = findFreePort()
   echo "E2E: serving ", docsDir, " on http://127.0.0.1:", port.uint16, "/"
 

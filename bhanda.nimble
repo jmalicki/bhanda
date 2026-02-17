@@ -7,9 +7,10 @@ license       = "MIT"
 srcDir        = "src"
 binDir        = "."
 
-# Dependencies: karax for browser UI; nimhttpd for E2E
+# Dependencies: karax for browser UI; nimhttpd for E2E; nim-playwright from Git for E2E
 requires "karax"
 requires "nimhttpd >= 1.0.0"
+requires "https://github.com/jmalicki/nim-playwright#head"
 
 # Tasks (all compilation output goes into build/, which is gitignored)
 

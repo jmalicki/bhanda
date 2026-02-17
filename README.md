@@ -32,7 +32,22 @@ nimble format
 nimble buildjs
 ```
 
-Then open `index.html` in a browser. Use a local HTTP server to avoid CORS (e.g. `python -m http.server 8000` or `nimble serve` if you add that task).
+Then open `index.html` in a browser.
+
+### E2E tests (Playwright)
+
+```bash
+nimble testE2e   # installs Node deps + Chromium, builds JS, runs E2E
+```
+
+For debugging the Playwright Nim binding, use the vendored submodule so you can edit and re-run:
+
+```bash
+git submodule update --init -- vendor/nim-playwright
+bash tests/run_e2e.sh
+```
+
+Then edit `vendor/nim-playwright/src` as needed. Optional env vars: `BHANDA_E2E_HEADED=1` (show browser), `BHANDA_E2E_SLOW=500` (slow down in ms). Use a local HTTP server to avoid CORS (e.g. `python -m http.server 8000` or `nimble serve` if you add that task).
 
 ## Project layout
 

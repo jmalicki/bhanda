@@ -1,0 +1,3 @@
+[submodule "vendor/nim-playwright"]
+	path = vendor/nim-playwright
+	url = https://github.com/jmalicki/nim-playwright
