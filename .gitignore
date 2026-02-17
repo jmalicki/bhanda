@@ -3,6 +3,7 @@ nimcache/
 *.exe
 # Build output (all binaries and JS go here; CI copies build/bhanda.js to docs/ for Pages)
 build/
+src/main
 bhanda.js
 # Build output (CI builds and deploys docs/bhanda.js for GitHub Pages)
 docs/bhanda.js
